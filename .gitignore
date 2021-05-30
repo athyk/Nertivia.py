@@ -1,0 +1,7 @@
+/.idea/
+/build/lib/
+/dist/
+/nertivia/pda.egg-info/
+/pda.egg-info/
+/pna.egg-info/
+/venv/
