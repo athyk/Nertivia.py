@@ -5,3 +5,4 @@
 /pda.egg-info/
 /pna.egg-info/
 /venv/
+**/__pycache__/
