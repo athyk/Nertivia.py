@@ -1,6 +1,6 @@
 import nertivia
 
-token = "BOT TOKEN"
+token = "NjcxNjMxNTE1OTYyODg3NzgyNC0x.7RaBsYbicEiB-qgymPRqGkj2ccXHW0pUMeIDXuLhNnw"
 
 client = nertivia.Bot()
 
@@ -13,6 +13,11 @@ async def on_ready(data: nertivia.User):
 @client.event
 async def on_quit():
     print("I'm disconnected!")
+
+
+@client.event
+async def on_status_change(data):
+    print(data)
 
 
 @client.event

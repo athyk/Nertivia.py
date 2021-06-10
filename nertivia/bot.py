@@ -4,7 +4,7 @@ import socketioN
 from .http import HTTPClient
 
 SOCKET_IP = "https://nertivia.net"
-sio = socketioN.AsyncClient()
+sio = socketioN.AsyncClient()  # logger=True, engineio_logger=True
 
 token = None
 
@@ -67,3 +67,5 @@ class Bot:
             return self.on("receiveMessage")(args[0])
         if args[0].__name__ == "on_quit":
             return self.on("disconnect")(args[0])
+        if args[0].__name__ == "on_status_change":
+            return self.on("member:custom_status_change")(args[0])
