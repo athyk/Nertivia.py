@@ -1,3 +1,4 @@
+import nertivia
 from nertivia import http
 
 URL = "https://nertivia.net/api/messages/channels/"
@@ -12,7 +13,7 @@ class Channel(object):
             self.name = channel["channel"]["name"]
             self.status = channel["channel"]["status"]
             self.name = channel["channel"]["name"]
-            self.server = http.HTTPClient().get_server(channel["channel"]["server_id"])
+            self.server: nertivia.Server = http.HTTPClient().get_server(channel["channel"]["server_id"])
             self.last_messaged = channel["channel"]["timestamp"]
             self._channel = channel["channel"]
         else:

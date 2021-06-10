@@ -13,7 +13,7 @@ setuptools.setup(
     description='Python API Wrapper for Nertivia to make bots',  # Give a short description about your library
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/FluxedScript/PNA/tree/main",
+    url="https://github.com/FluxedScript/PNA/",
     author='FluxedScript',  # Type in your name
     keywords=['API Wrapper', 'SIMPLE', 'PYTHON', "nertivia"],  # Keywords that define your package best
     package_dir={"socketioN": "socketioN"},
