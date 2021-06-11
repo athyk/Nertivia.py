@@ -2,6 +2,8 @@
 
 This is a Python API Wrapper for the Nertiva chat platform.
 
+Support Server: https://nertivia.net/i/pna
+
 ## Installation
 You can install `PNA` with pip using
 `pip install PNA` or `pip3 install PNA`
