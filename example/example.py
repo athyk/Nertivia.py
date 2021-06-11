@@ -1,6 +1,6 @@
 import nertivia
 
-token = "NjcxNjMxNTE1OTYyODg3NzgyNC0x.7RaBsYbicEiB-qgymPRqGkj2ccXHW0pUMeIDXuLhNnw"
+token = ""
 
 client = nertivia.Bot()
 
