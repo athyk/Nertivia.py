@@ -8,7 +8,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name='pna',  # How you named your package folder (MyLib)
-    version='0.0.4',  # Start with a small number and increase it with every change you make
+    version='0.0.5',  # Start with a small number and increase it with every change you make
     license='apache-2.0',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='Python API Wrapper for Nertivia to make bots',  # Give a short description about your library
     long_description=long_description,
@@ -17,7 +17,7 @@ setuptools.setup(
     author='FluxedScript',  # Type in your name
     keywords=['API Wrapper', 'SIMPLE', 'PYTHON', "nertivia"],  # Keywords that define your package best
     package_dir={"socketioN": "socketioN"},
-    packages=setuptools.find_namespace_packages(include=['nertivia', "socketioN"]),
+    packages=setuptools.find_namespace_packages(include=['nertivia', "socketioN", "engineioN"]),
     install_requires=requirements,
     extras_require={
         'client': [

@@ -2,7 +2,7 @@ import asyncio
 import logging
 import random
 
-import engineio
+import engineioN
 import six
 
 from . import client
@@ -113,7 +113,7 @@ class AsyncClient(client.Client):
             await self.eio.connect(url, headers=headers,
                                    transports=transports,
                                    engineio_path=socketio_path)
-        except engineio.exceptions.ConnectionError as exc:
+        except engineioN.exceptions.ConnectionError as exc:
             await self._trigger_event(
                 'connect_error', '/',
                 exc.args[1] if len(exc.args) > 1 else exc.args[0])
@@ -495,4 +495,4 @@ class AsyncClient(client.Client):
                 self._handle_reconnect)
 
     def _engineio_client_class(self):
-        return engineio.AsyncClient
+        return engineioN.AsyncClient

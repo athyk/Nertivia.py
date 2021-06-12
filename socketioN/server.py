@@ -1,6 +1,6 @@
 import logging
 
-import engineio
+import engineioN
 import six
 
 from . import base_manager
@@ -761,4 +761,4 @@ class Server(object):
             del self.environ[sid]
 
     def _engineio_server_class(self):
-        return engineio.Server
+        return engineioN.Server

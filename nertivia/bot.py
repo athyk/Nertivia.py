@@ -1,23 +1,29 @@
 import asyncio
+import logging
 
 import socketioN
 from .http import HTTPClient
 
+default_logger = logging.getLogger('nertivia')
+
 SOCKET_IP = "https://nertivia.net"
-sio = socketioN.AsyncClient()  # logger=True, engineio_logger=True
+#sio = socketioN.AsyncClient()  # logger=True, engineio_logger=True
 
 token = None
 
 
 class Bot:
-    global token
+    global token, default_logger
 
     def __init__(self, **args):
         global SOCKET_IP
         if args.get("test"):
             SOCKET_IP = "http://server.localtest.me"
         self._listeners = {}
-        self.sio = sio
+        if args.get("debug"):
+            self.sio = socketioN.AsyncClient(logger="True", engineio_logger="True")
+        else:
+            self.sio = socketioN.AsyncClient()
         self.http = HTTPClient(socket_ip=SOCKET_IP)
         self.headers = {'Accept': 'text/plain',
                         'authorization': token,
@@ -28,12 +34,19 @@ class Bot:
 
     async def main(self, new_token):
         await self.sio.connect(SOCKET_IP, namespaces=['/'], transports=['websocket'])
-        await sio.emit('authentication', {'token': new_token})
+        await self.sio.emit('authentication', {'token': new_token})
 
-        @sio.event
+        a_sio = self.sio
+
+        @a_sio.event
         def auth_err(data):
             print("Invalid Token")
-        await sio.wait()
+
+        @a_sio.event
+        def success(data):
+            print("Success")
+
+        await a_sio.wait()
 
     def login(self, new_token):
         global token
