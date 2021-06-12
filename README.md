@@ -1,6 +1,6 @@
 # PNA - Python Nertivia API
 
-This is a Python API Wrapper for the Nertiva chat platform.
+This is a Python API Wrapper for the Nertiva chat platform. The replaces the deprecated Nertivia.py api wrapper. 
 
 Support Server: https://nertivia.net/i/pna
 
@@ -36,3 +36,18 @@ async def on_message(message):
 
 client.login(token)
 ```
+
+### Planned changes to Python Nertivia API
+
+- Add support for commands for better organisation
+- Sub folder for events and commands
+- Write docs for PNA
+
+### Why not to use Nertivia.py
+
+At the time of writing, Nertivia.py is severely outdated and provides no use to any developers. 
+
+Many changes are needed to make Nertivia.py up to date such as upgrading from
+`nertivia.tk` to `nertivia.net`. 
+
+
