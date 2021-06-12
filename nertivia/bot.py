@@ -42,10 +42,6 @@ class Bot:
         def auth_err(data):
             print("Invalid Token")
 
-        @a_sio.event
-        def success(data):
-            print("Success")
-
         await a_sio.wait()
 
     def login(self, new_token):
