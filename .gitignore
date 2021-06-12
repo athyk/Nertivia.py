@@ -6,3 +6,4 @@
 /pna.egg-info/
 /venv/
 **/__pycache__/
+/example/mainbot.py

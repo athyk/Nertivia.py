@@ -1,6 +1,6 @@
 import asyncio
 
-import engineio
+import engineioN
 import six
 
 from . import asyncio_manager
@@ -558,4 +558,4 @@ class AsyncServer(server.Server):
             del self.environ[sid]
 
     def _engineio_server_class(self):
-        return engineio.AsyncServer
+        return engineioN.AsyncServer

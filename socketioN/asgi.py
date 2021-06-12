@@ -1,7 +1,7 @@
-import engineio
+import engineioN
 
 
-class ASGIApp(engineio.ASGIApp):  # pragma: no cover
+class ASGIApp(engineioN.ASGIApp):  # pragma: no cover
     """ASGI application middleware for Socket.IO.
 
     This middleware dispatches traffic to an Socket.IO application. It can
@@ -27,7 +27,7 @@ class ASGIApp(engineio.ASGIApp):  # pragma: no cover
         import uvicorn
 
         sio = socketioN.AsyncServer()
-        app = engineio.ASGIApp(sio, static_files={
+        app = engineioN.ASGIApp(sio, static_files={
             '/': 'index.html',
             '/static': './public',
         })

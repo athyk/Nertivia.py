@@ -4,7 +4,7 @@ import random
 import signal
 import threading
 
-import engineio
+import engineioN
 import six
 
 from . import exceptions
@@ -112,13 +112,14 @@ class Client(object):
         self.eio.on('message', self._handle_eio_message)
         self.eio.on('disconnect', self._handle_eio_disconnect)
 
-        if not isinstance(logger, bool):
+        if not isinstance(logger, bool) and not isinstance(logger, str):
             self.logger = logger
         else:
             self.logger = default_logger
-            if not logging.root.handlers and \
-                    self.logger.level == logging.NOTSET:
-                if logger:
+            if self.logger.level == logging.ERROR and logger == "True":
+                self.logger.setLevel(logging.INFO)
+            if not logging.root.handlers and self.logger.level == logging.NOTSET:
+                if logger == "True":
                     self.logger.setLevel(logging.INFO)
                 else:
                     self.logger.setLevel(logging.ERROR)
@@ -279,7 +280,7 @@ class Client(object):
         try:
             self.eio.connect(url, headers=headers, transports=transports,
                              engineio_path=socketio_path)
-        except engineio.exceptions.ConnectionError as exc:
+        except engineioN.exceptions.ConnectionError as exc:
             self._trigger_event(
                 'connect_error', '/',
                 exc.args[1] if len(exc.args) > 1 else exc.args[0])
@@ -641,4 +642,4 @@ class Client(object):
                 self._handle_reconnect)
 
     def _engineio_client_class(self):
-        return engineio.Client
+        return engineioN.Client

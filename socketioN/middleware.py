@@ -1,7 +1,7 @@
-import engineio
+import engineioN
 
 
-class WSGIApp(engineio.WSGIApp):
+class WSGIApp(engineioN.WSGIApp):
     """WSGI middleware for Socket.IO.
 
     This middleware dispatches traffic to a Socket.IO application. It can also
