@@ -386,23 +386,38 @@ class AsyncClient(client.Client):
     async def _trigger_event(self, event, namespace, *args):
         """Invoke an application event handler."""
         # first see if we have an explicit handler for the event
+        ret = None
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
-                    if event == "receiveMessage":
-                        ret = await self.handlers[namespace][event](nertivia.message.Message(*args))
-                    elif event == "success":
-                        ret = await self.handlers[namespace][event](nertivia.user.User(*args))
-                    else:
-                        ret = await self.handlers[namespace][event](*args)
-                except asyncio.CancelledError:  # pragma: no cover
-                    ret = None
+                    for handler in self.handlers[namespace][event]:
+                        try:
+                            if event == "receiveMessage":
+                                ret = await handler(nertivia.message.Message(*args))
+                            elif event == "success":
+                                ret = await handler(nertivia.user.User(*args))
+                            else:
+                                ret = await handler(*args)
+                        except asyncio.CancelledError:  # pragma: no cover
+                            ret = None
+                except Exception as e:
+                    print(e)
+                    await self.handlers[namespace][event](*args)
             else:
-                ret = self.handlers[namespace][event](*args)
+                try:
+                    for handler in self.handlers[namespace][event]:
+                        if event == "receiveMessage":
+                            ret = await handler(nertivia.message.Message(*args))
+                        else:
+                            ret = await handler(*args)
+                except Exception as e:
+                    print(e)
+                    self.handlers[namespace][event](*args)
             return ret
 
         # or else, forward the event to a namepsace handler if one exists
         elif namespace in self.namespace_handlers:
+            print(3)
             return await self.namespace_handlers[namespace].trigger_event(
                 event, *args)
 

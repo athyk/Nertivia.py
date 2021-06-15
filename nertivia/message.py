@@ -25,10 +25,6 @@ class Message:
         return self.id
 
     @property
-    def _content(self):
-        return self.content
-
-    @property
     def _author(self):
         return self.author
 
