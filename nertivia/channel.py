@@ -7,24 +7,27 @@ URL_STA = "https://nertivia.net/api/settings/status"
 
 
 class Channel(object):
-    def __init__(self, channel):
+    def __init__(self, channel, **kwargs):
+        self.cache = None
+        if kwargs.get("cache"):
+            self.cache = kwargs.get("cache")
+        self.http = http.HTTPClient(cache=self.cache)
         if "channel" in channel:
             self.id = channel["channel"]["channelID"]
             self.name = channel["channel"]["name"]
             self.status = channel["channel"]["status"]
             self.name = channel["channel"]["name"]
-            self.server: nertivia.Server = http.HTTPClient().get_server(channel["channel"]["server_id"])
+            self.server: nertivia.Server = self.http.get_server(channel["channel"]["server_id"])
             self.last_messaged = channel["channel"]["timestamp"]
             self._channel = channel["channel"]
         else:
             self.id = channel["channelID"]
             self.name = channel["name"]
             self.name = channel["name"]
-            self.server = http.HTTPClient().get_server(channel["server_id"])
+            self.server = self.http.get_server(channel["server_id"])
             if "timestamp" in channel:
                 self.last_messaged = channel["timestamp"]
             self._channel = channel
-        self.http = http.HTTPClient()
 
     async def send(self, message):
         await self.http.send_message(self.id, message)

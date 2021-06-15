@@ -79,6 +79,9 @@ class HTTPClient:
             URL = f"{socket_ip}/api/channels/"
             URL_MSG = f"{socket_ip}/api/messages/"
             URL_STA = f"{socket_ip}/api/settings/status"
+        self.cache = None
+        if kwargs.get("cache"):
+            self.cache = kwargs.get("cache")
         self.token = None
         self.user = {}
         self._servers = {}
@@ -144,17 +147,22 @@ class HTTPClient:
         if res.status != 200:
             return res.content
         await session.close()
-        return nertivia.message.Message({'message': await res.json()})
+        return nertivia.message.Message({'message': await res.json()}, cache=self.cache)
 
     def get_channel(self, channel_id):
         res = asyncio.run(fetch_channel(channel_id))
-        return nertivia.Channel(res)
+        return nertivia.Channel(res, cache=self.cache)
 
     def get_user(self, user_id):
         res = asyncio.run(fetch_user(user_id))
-        return nertivia.User(res)
+        return nertivia.User(res, cache=self.cache)
 
     def get_server(self, server_id):
-        res = asyncio.run(fetch_server(server_id))
-        return nertivia.Server(res)
+        res = None
+        if str(server_id) in self.cache.guilds:
+            res = self.cache.guilds[str(server_id)]
+        else:
+            res = nertivia.Server(asyncio.run(fetch_server(server_id)), cache=self.cache)
+
+        return res
 

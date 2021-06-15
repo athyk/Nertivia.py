@@ -1,6 +1,8 @@
 class User(object):
-    def __init__(self, user):
-        print(user['user'])
+    def __init__(self, user, **kwargs):
+        self.cache = None
+        if kwargs.get("cache"):
+            self.cache = kwargs.get("cache")
         if "uniqueID" in user["user"]:
             self.id = user['user']['uniqueID']
         else:

@@ -66,6 +66,7 @@ class AsyncClient(client.Client):
                             fatal errors are logged even when
                             ``engineio_logger`` is ``False``.
     """
+
     def is_asyncio_based(self):
         return True
 
@@ -387,13 +388,26 @@ class AsyncClient(client.Client):
         """Invoke an application event handler."""
         # first see if we have an explicit handler for the event
         ret = None
+        if event == "server:joined":
+            self.guilds[str(args[0]["server_id"])] = nertivia.Server(args[0])
+        elif event == "server:leave":
+            self.guilds.pop(str(args[0]["server_id"]), None)
+        elif event == "success":
+            servers = args[0]["user"]["servers"]
+
+            for guild in servers:
+                try:
+                    self.guilds[guild["server_id"]] = nertivia.Server(guild)
+                except Exception as e:
+                    print(e)
+        cache = nertivia.cache.Cache(guilds=self.guilds, users=self.users, channels=self.channels)
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
                     for handler in self.handlers[namespace][event]:
                         try:
                             if event == "receiveMessage":
-                                ret = await handler(nertivia.message.Message(*args))
+                                ret = await handler(nertivia.message.Message(*args, cache=cache))
                             elif event == "success":
                                 ret = await handler(nertivia.user.User(*args))
                             else:
@@ -407,7 +421,7 @@ class AsyncClient(client.Client):
                 try:
                     for handler in self.handlers[namespace][event]:
                         if event == "receiveMessage":
-                            ret = await handler(nertivia.message.Message(*args))
+                            ret = await handler(nertivia.message.Message(*args, cache=cache))
                         else:
                             ret = await handler(*args)
                 except Exception as e:
@@ -417,7 +431,6 @@ class AsyncClient(client.Client):
 
         # or else, forward the event to a namepsace handler if one exists
         elif namespace in self.namespace_handlers:
-            print(3)
             return await self.namespace_handlers[namespace].trigger_event(
                 event, *args)
 

@@ -140,6 +140,9 @@ class Client(object):
         self._binary_packet = None
         self._reconnect_task = None
         self._reconnect_abort = self.eio.create_event()
+        self.guilds = {}
+        self.users = {}
+        self.channels = {}
 
     def is_asyncio_based(self):
         return False
