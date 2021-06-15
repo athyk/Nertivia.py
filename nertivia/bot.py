@@ -61,7 +61,9 @@ class Bot:
         def set_handler(handler):
             if namespace not in self.sio.handlers:
                 self.sio.handlers[namespace] = {}
-            self.sio.handlers[namespace][event] = handler
+            if event not in self.sio.handlers[namespace]:
+                self.sio.handlers[namespace][event] = []
+            self.sio.handlers[namespace][event].append(handler)
             return handler
 
         if handler is None:

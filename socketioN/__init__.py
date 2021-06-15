@@ -2,8 +2,6 @@ import sys
 
 from .client import Client
 from .namespace import Namespace, ClientNamespace
-from .middleware import WSGIApp, Middleware
-from .tornado import get_tornado_handler
 
 if sys.version_info >= (3, 5):  # pragma: no cover
     from .asyncio_client import AsyncClient
