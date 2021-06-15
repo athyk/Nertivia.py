@@ -17,4 +17,4 @@ else:  # pragma: no cover
 __version__ = '4.6.1'
 
 __all__ = ['__version__', 'Client',
-           'Namespace', 'ClientNamespace', 'WSGIApp', 'Middleware']
+           'Namespace', 'ClientNamespace']
