@@ -33,7 +33,7 @@ class Bot:
         return self.sio
 
     async def main(self, new_token):
-        await self.sio.connect(SOCKET_IP, namespaces=['/'], transports=['websocket'])
+        await self.sio.connect(SOCKET_IP, transports=['websocket'])
         await self.sio.emit('authentication', {'token': new_token})
 
         a_sio = self.sio
