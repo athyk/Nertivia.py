@@ -390,9 +390,8 @@ class AsyncClient(client.Client):
         ret = None
         if event == "server:joined":
             self.guilds[str(args[0]["server_id"])] = nertivia.Server(args[0])
-        elif event == "server:leave":
-            self.guilds.pop(str(args[0]["server_id"]), None)
         elif event == "success":
+
             servers = args[0]["user"]["servers"]
 
             for guild in servers:
@@ -400,7 +399,20 @@ class AsyncClient(client.Client):
                     self.guilds[guild["server_id"]] = nertivia.Server(guild)
                 except Exception as e:
                     print(e)
+
+            members = args[0]["serverMembers"]
+            for member in members:
+                self.users[member["member"]["id"]] = nertivia.User(member["member"])
+        if event == "server:member_add":
+            self.users[str(args[0]["member"]["id"])] = nertivia.User(args[0])
+
         cache = nertivia.cache.Cache(guilds=self.guilds, users=self.users, channels=self.channels)
+
+        if event == "server:member_remove":
+            self.users.pop(str(args[0]["id"]), None)
+        if event == "server:leave":
+            self.guilds.pop(str(args[0]["server_id"]), None)
+
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
@@ -427,6 +439,7 @@ class AsyncClient(client.Client):
                 except Exception as e:
                     print(e)
                     self.handlers[namespace][event](*args)
+
             return ret
 
         # or else, forward the event to a namepsace handler if one exists
