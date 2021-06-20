@@ -3,8 +3,9 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open('requirements.txt') as f:
-    requirements: list = f.read().splitlines()
+
+requirements: list = ["setuptools", "requests", "nest_asyncio", "six>=1.9.0", "websocket-client>=0.54.0",
+                      "websockets>=7.0", "aiohttp>=3.4", "six>=1.9.0"]
 
 setuptools.setup(
     name='pna',  # How you named your package folder (MyLib)
