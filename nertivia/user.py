@@ -5,21 +5,21 @@ class User(object):
             self.cache = kwargs.get("cache")
         if "user" not in user:
             user = {"user": user}
+
         if "uniqueID" in user["user"]:
             self.id = user['user']['uniqueID']
         else:
             self.id = user['user']['id']
-        if "username" in user["user"]:
-            self.username = user['user']['username']
-        if "tag" in user["user"]:
-            self.tag = user['user']['tag']
+
+        self.username = user['user']['username']
+        self.tag = user['user']['tag']
         if "bot" in user["user"]:
             self.bot = user['user']['bot']
+        else:
+            self.bot = False
         #self.banner =  user['user']['banner']
-        if "avatar" in user["user"]:
-            self.avatar_url = "https://nertivia.net/api/avatars/{}".format(user['user']['avatar'])
-        if "user" in user["user"] and "tag" in user["user"]:
-            self.user = "{}@{}".format(user['user']['username'], user['user']['tag'])
+        self.avatar_url = "https://nertivia.net/api/avatars/{}".format(user['user']['avatar'])
+        self.user = "{}@{}".format(user['user']['username'], user['user']['tag'])
 
     @property
     def _id(self):
