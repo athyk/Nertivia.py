@@ -15,8 +15,6 @@ class User(object):
             self.tag = user['user']['tag']
         if "bot" in user["user"]:
             self.bot = user['user']['bot']
-        if "survey_completed" in user["user"]:
-            self.survey_completed = user['user']['survey_completed']
         #self.banner =  user['user']['banner']
         if "avatar" in user["user"]:
             self.avatar_url = "https://nertivia.net/api/avatars/{}".format(user['user']['avatar'])
