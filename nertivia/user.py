@@ -17,7 +17,6 @@ class User(object):
             self.bot = user['user']['bot']
         else:
             self.bot = False
-        #self.banner =  user['user']['banner']
         self.avatar_url = "https://nertivia.net/api/avatars/{}".format(user['user']['avatar'])
         self.user = "{}@{}".format(user['user']['username'], user['user']['tag'])
 
