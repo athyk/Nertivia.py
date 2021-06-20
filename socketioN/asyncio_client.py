@@ -3,15 +3,11 @@ import logging
 import random
 
 import engineioN
-import six
+import nertivia
 
 from . import client
 from . import exceptions
 from . import packet
-import nertivia.message
-import nertivia.user
-import nertivia.server
-import nertivia.channel
 
 default_logger = logging.getLogger('socketioN.client')
 
@@ -26,7 +22,7 @@ class AsyncClient(client.Client):
                          reconnect to the server after an interruption, or
                          ``False`` to not reconnect. The default is ``True``.
     :param reconnection_attempts: How many reconnection attempts to issue
-                                  before giving up, or 0 for infinity attempts.
+                                  before giving up, or 0 for infinite attempts.
                                   The default is 0.
     :param reconnection_delay: How long to wait in seconds before the first
                                reconnection attempt. Each successive attempt
@@ -41,12 +37,6 @@ class AsyncClient(client.Client):
                    use. To disable logging set to ``False``. The default is
                    ``False``. Note that fatal errors are logged even when
                    ``logger`` is ``False``.
-    :param binary: ``True`` to support binary payloads, ``False`` to treat all
-                   payloads as text. On Python 2, if this is set to ``True``,
-                   ``unicode`` values are treated as text, and ``str`` and
-                   ``bytes`` values are treated as binary.  This option has no
-                   effect on Python 3, where text and binary payloads are
-                   always automatically discovered.
     :param json: An alternative json module to use for encoding and decoding
                  packets. Custom json modules must have ``dumps`` and ``loads``
                  functions that are compatible with the standard library
@@ -56,6 +46,10 @@ class AsyncClient(client.Client):
 
     :param request_timeout: A timeout in seconds for requests. The default is
                             5 seconds.
+    :param http_session: an initialized ``requests.Session`` object to be used
+                         when sending requests to the server. Use it if you
+                         need to add special client options such as proxy
+                         servers, SSL certificates, etc.
     :param ssl_verify: ``True`` to verify SSL certificates, or ``False`` to
                        skip SSL certificate verification, allowing
                        connections to servers with self signed certificates.
@@ -66,29 +60,47 @@ class AsyncClient(client.Client):
                             fatal errors are logged even when
                             ``engineio_logger`` is ``False``.
     """
-
     def is_asyncio_based(self):
         return True
 
-    async def connect(self, url, headers={}, transports=None,
-                      namespaces=None, socketio_path='socket.io'):
+    async def connect(self, url, headers={}, auth=None, transports=None,
+                      namespaces=None, socketio_path='socket.io', wait=True,
+                      wait_timeout=1):
         """Connect to a Socket.IO server.
 
         :param url: The URL of the Socket.IO server. It can include custom
-                    query string parameters if required by the server.
+                    query string parameters if required by the server. If a
+                    function is provided, the client will invoke it to obtain
+                    the URL each time a connection or reconnection is
+                    attempted.
         :param headers: A dictionary with custom headers to send with the
-                        connection request.
+                        connection request. If a function is provided, the
+                        client will invoke it to obtain the headers dictionary
+                        each time a connection or reconnection is attempted.
+        :param auth: Authentication data passed to the server with the
+                     connection request, normally a dictionary with one or
+                     more string key/value pairs. If a function is provided,
+                     the client will invoke it to obtain the authentication
+                     data each time a connection or reconnection is attempted.
         :param transports: The list of allowed transports. Valid transports
                            are ``'polling'`` and ``'websocket'``. If not
                            given, the polling transport is connected first,
                            then an upgrade to websocket is attempted.
-        :param namespaces: The list of custom namespaces to connect, in
-                           addition to the default namespace. If not given,
-                           the namespace list is obtained from the registered
-                           event handlers.
+        :param namespaces: The namespaces to connect as a string or list of
+                           strings. If not given, the namespaces that have
+                           registered event handlers are connected.
         :param socketio_path: The endpoint where the Socket.IO server is
                               installed. The default value is appropriate for
                               most cases.
+        :param wait: if set to ``True`` (the default) the call only returns
+                     when all the namespaces are connected. If set to
+                     ``False``, the call returns as soon as the Engine.IO
+                     transport is connected, and the namespaces will connect
+                     in the background.
+        :param wait_timeout: How long the client should wait for the
+                             connection. The default is 1 second. This
+                             argument is only considered when ``wait`` is set
+                             to ``True``.
 
         Note: this method is a coroutine.
 
@@ -97,28 +109,56 @@ class AsyncClient(client.Client):
             sio = socketioN.AsyncClient()
             sio.connect('http://localhost:5000')
         """
+        if self.connected:
+            raise exceptions.ConnectionError('Already connected')
+
         self.connection_url = url
         self.connection_headers = headers
+        self.connection_auth = auth
         self.connection_transports = transports
         self.connection_namespaces = namespaces
         self.socketio_path = socketio_path
 
         if namespaces is None:
-            namespaces = set(self.handlers.keys()).union(
-                set(self.namespace_handlers.keys()))
-        elif isinstance(namespaces, six.string_types):
+            namespaces = list(set(self.handlers.keys()).union(
+                set(self.namespace_handlers.keys())))
+            if len(namespaces) == 0:
+                namespaces = ['/']
+        elif isinstance(namespaces, str):
             namespaces = [namespaces]
-            self.connection_namespaces = namespaces
-        self.namespaces = [n for n in namespaces if n != '/']
+        self.connection_namespaces = namespaces
+        self.namespaces = {}
+        if self._connect_event is None:
+            self._connect_event = self.eio.create_event()
+        else:
+            self._connect_event.clear()
+        real_url = await self._get_real_value(self.connection_url)
+        real_headers = await self._get_real_value(self.connection_headers)
         try:
-            await self.eio.connect(url, headers=headers,
+            await self.eio.connect(real_url, headers=real_headers,
                                    transports=transports,
                                    engineio_path=socketio_path)
         except engineioN.exceptions.ConnectionError as exc:
             await self._trigger_event(
                 'connect_error', '/',
                 exc.args[1] if len(exc.args) > 1 else exc.args[0])
-            six.raise_from(exceptions.ConnectionError(exc.args[0]), None)
+            raise exceptions.ConnectionError(exc.args[0]) from None
+
+        if wait:
+            try:
+                while True:
+                    await asyncio.wait_for(self._connect_event.wait(),
+                                           wait_timeout)
+                    self._connect_event.clear()
+                    if set(self.namespaces) == set(self.connection_namespaces):
+                        break
+            except asyncio.TimeoutError:
+                pass
+            if set(self.namespaces) != set(self.connection_namespaces):
+                await self.disconnect()
+                raise exceptions.ConnectionError(
+                    'One or more namespaces failed to connect')
+
         self.connected = True
 
     async def wait(self):
@@ -165,15 +205,14 @@ class AsyncClient(client.Client):
         Note 2: this method is a coroutine.
         """
         namespace = namespace or '/'
-        if namespace != '/' and namespace not in self.namespaces:
+        if namespace not in self.namespaces:
             raise exceptions.BadNamespaceError(
                 namespace + ' is not a connected namespace.')
         self.logger.info('Emitting event "%s" [%s]', event, namespace)
-        id = None if callback is None else self._generate_ack_id(namespace, callback)
-        if six.PY2 and not self.binary:
-            binary = False  # pragma: nocover
+        if callback is not None:
+            id = self._generate_ack_id(namespace, callback)
         else:
-            binary = None
+            id = None
         # tuples are expanded to multiple arguments, everything else is sent
         # as a single argument
         if isinstance(data, tuple):
@@ -183,8 +222,7 @@ class AsyncClient(client.Client):
         else:
             data = []
         await self._send_packet(packet.Packet(
-            packet.EVENT, namespace=namespace, data=[event] + data, id=id,
-            binary=binary))
+            packet.EVENT, namespace=namespace, data=[event] + data, id=id))
 
     async def send(self, data, namespace=None, callback=None):
         """Send a message to one or more connected clients.
@@ -246,7 +284,7 @@ class AsyncClient(client.Client):
         try:
             await asyncio.wait_for(callback_event.wait(), timeout)
         except asyncio.TimeoutError:
-            six.raise_from(exceptions.TimeoutError(), None)
+            raise exceptions.TimeoutError() from None
         return callback_args[0] if len(callback_args[0]) > 1 \
             else callback_args[0][0] if len(callback_args[0]) == 1 \
             else None
@@ -260,10 +298,7 @@ class AsyncClient(client.Client):
         # later in _handle_eio_disconnect we invoke the disconnect handler
         for n in self.namespaces:
             await self._send_packet(packet.Packet(packet.DISCONNECT,
-                                                  namespace=n))
-        await self._send_packet(packet.Packet(
-            packet.DISCONNECT, namespace='/'))
-        self.connected = False
+                                    namespace=n))
         await self.eio.disconnect(abort=True)
 
     def start_background_task(self, target, *args, **kwargs):
@@ -295,41 +330,42 @@ class AsyncClient(client.Client):
         """
         return await self.eio.sleep(seconds)
 
+    async def _get_real_value(self, value):
+        """Return the actual value, for parameters that can also be given as
+        callables."""
+        if not callable(value):
+            return value
+        if asyncio.iscoroutinefunction(value):
+            return await value()
+        return value()
+
     async def _send_packet(self, pkt):
         """Send a Socket.IO packet to the server."""
         encoded_packet = pkt.encode()
         if isinstance(encoded_packet, list):
-            binary = False
             for ep in encoded_packet:
-                await self.eio.send(ep, binary=binary)
-                binary = True
+                await self.eio.send(ep)
         else:
-            await self.eio.send(encoded_packet, binary=False)
+            await self.eio.send(encoded_packet)
 
-    async def _handle_connect(self, namespace):
+    async def _handle_connect(self, namespace, data):
         namespace = namespace or '/'
-        self.logger.info('Namespace {} is connected'.format(namespace))
-        await self._trigger_event('connect', namespace=namespace)
-        if namespace == '/':
-            for n in self.namespaces:
-                await self._send_packet(packet.Packet(packet.CONNECT,
-                                                      namespace=n))
-        elif namespace not in self.namespaces:
-            self.namespaces.append(namespace)
+        if namespace not in self.namespaces:
+            self.logger.info('Namespace {} is connected'.format(namespace))
+            self.namespaces[namespace] = (data or {}).get('sid', self.sid)
+            await self._trigger_event('connect', namespace=namespace)
+            self._connect_event.set()
 
     async def _handle_disconnect(self, namespace):
         if not self.connected:
             return
         namespace = namespace or '/'
-        if namespace == '/':
-            for n in self.namespaces:
-                await self._trigger_event('disconnect', namespace=n)
-            self.namespaces = []
         await self._trigger_event('disconnect', namespace=namespace)
         if namespace in self.namespaces:
-            self.namespaces.remove(namespace)
-        if namespace == '/':
+            del self.namespaces[namespace]
+        if not self.namespaces:
             self.connected = False
+            await self.eio.disconnect(abort=True)
 
     async def _handle_event(self, namespace, id, data):
         namespace = namespace or '/'
@@ -344,13 +380,8 @@ class AsyncClient(client.Client):
                 data = list(r)
             else:
                 data = [r]
-            if six.PY2 and not self.binary:
-                binary = False  # pragma: nocover
-            else:
-                binary = None
             await self._send_packet(packet.Packet(
-                packet.ACK, namespace=namespace, id=id, data=data,
-                binary=binary))
+                packet.ACK, namespace=namespace, id=id, data=data))
 
     async def _handle_ack(self, namespace, id, data):
         namespace = namespace or '/'
@@ -378,10 +409,11 @@ class AsyncClient(client.Client):
         elif not isinstance(data, (tuple, list)):
             data = (data,)
         await self._trigger_event('connect_error', namespace, *data)
+        self._connect_event.set()
         if namespace in self.namespaces:
-            self.namespaces.remove(namespace)
+            del self.namespaces[namespace]
         if namespace == '/':
-            self.namespaces = []
+            self.namespaces = {}
             self.connected = False
 
     async def _trigger_event(self, event, namespace, *args):
@@ -439,7 +471,6 @@ class AsyncClient(client.Client):
                 except Exception as e:
                     print(e)
                     self.handlers[namespace][event](*args)
-
             return ret
 
         # or else, forward the event to a namepsace handler if one exists
@@ -448,6 +479,8 @@ class AsyncClient(client.Client):
                 event, *args)
 
     async def _handle_reconnect(self):
+        if self._reconnect_abort is None:  # pragma: no cover
+            self._reconnect_abort = self.eio.create_event()
         self._reconnect_abort.clear()
         client.reconnecting_clients.append(self)
         attempt_count = 0
@@ -455,7 +488,8 @@ class AsyncClient(client.Client):
         while True:
             delay = current_delay
             current_delay *= 2
-            delay = min(delay, self.reconnection_delay_max)
+            if delay > self.reconnection_delay_max:
+                delay = self.reconnection_delay_max
             delay += self.randomization_factor * (2 * random.random() - 1)
             self.logger.info(
                 'Connection failed, new attempt in {:.02f} seconds'.format(
@@ -470,6 +504,7 @@ class AsyncClient(client.Client):
             try:
                 await self.connect(self.connection_url,
                                    headers=self.connection_headers,
+                                   auth=self.connection_auth,
                                    transports=self.connection_transports,
                                    namespaces=self.connection_namespaces,
                                    socketio_path=self.socketio_path)
@@ -486,10 +521,14 @@ class AsyncClient(client.Client):
                 break
         client.reconnecting_clients.remove(self)
 
-    def _handle_eio_connect(self):
+    async def _handle_eio_connect(self):
         """Handle the Engine.IO connection event."""
         self.logger.info('Engine.IO connection established')
         self.sid = self.eio.sid
+        real_auth = await self._get_real_value(self.connection_auth)
+        for n in self.connection_namespaces:
+            await self._send_packet(packet.Packet(
+                packet.CONNECT, data=real_auth, namespace=n))
 
     async def _handle_eio_message(self, data):
         """Dispatch Engine.IO messages."""
@@ -504,16 +543,17 @@ class AsyncClient(client.Client):
         else:
             pkt = packet.Packet(encoded_packet=data)
             if pkt.packet_type == packet.CONNECT:
-                await self._handle_connect(pkt.namespace)
+                await self._handle_connect(pkt.namespace, pkt.data)
             elif pkt.packet_type == packet.DISCONNECT:
                 await self._handle_disconnect(pkt.namespace)
             elif pkt.packet_type == packet.EVENT:
                 await self._handle_event(pkt.namespace, pkt.id, pkt.data)
             elif pkt.packet_type == packet.ACK:
                 await self._handle_ack(pkt.namespace, pkt.id, pkt.data)
-            elif pkt.packet_type in [packet.BINARY_EVENT, packet.BINARY_ACK]:
+            elif pkt.packet_type == packet.BINARY_EVENT or \
+                    pkt.packet_type == packet.BINARY_ACK:
                 self._binary_packet = pkt
-            elif pkt.packet_type == packet.ERROR:
+            elif pkt.packet_type == packet.CONNECT_ERROR:
                 await self._handle_error(pkt.namespace, pkt.data)
             else:
                 raise ValueError('Unknown packet type.')
@@ -521,12 +561,10 @@ class AsyncClient(client.Client):
     async def _handle_eio_disconnect(self):
         """Handle the Engine.IO disconnection event."""
         self.logger.info('Engine.IO connection dropped')
-        self._reconnect_abort.set()
         if self.connected:
             for n in self.namespaces:
                 await self._trigger_event('disconnect', namespace=n)
-            await self._trigger_event('disconnect', namespace='/')
-            self.namespaces = []
+            self.namespaces = {}
             self.connected = False
         self.callbacks = {}
         self._binary_packet = None
