@@ -36,5 +36,8 @@ class Message:
     async def edit(self, channel, content):
         await self.http.edit_message(self.id, channel, content)
 
+    async def send(self, message):
+        await self.http.send_message(self.channel.id, message)
+
     async def delete(self):
         await self.http.delete_message(self.id, self.channel.id)
