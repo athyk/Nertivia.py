@@ -2,7 +2,7 @@ import asyncio
 import logging
 import random
 
-import cache_nertivia_data
+from nertivia import cache_nertivia_data
 import engineioN
 import nertivia
 

@@ -1,7 +1,7 @@
 import asyncio
 import gc
 import json
-import cache_nertivia_data
+from nertivia import cache_nertivia_data
 import aiohttp
 import nest_asyncio
 import requests
