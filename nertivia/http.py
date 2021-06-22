@@ -151,8 +151,12 @@ class HTTPClient:
         return nertivia.Channel(res)
 
     def get_user(self, user_id):
-        res = asyncio.run(fetch_user(user_id))
-        return nertivia.User(res)
+        res = None
+        if str(user_id) in cache_nertivia_data.guilds:
+            res = cache_nertivia_data.users[str(user_id)]
+        else:
+            res = nertivia.User(asyncio.run(fetch_user(user_id)))
+        return res
 
     def get_server(self, server_id):
         res = None
