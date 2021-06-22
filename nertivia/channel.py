@@ -8,10 +8,7 @@ URL_STA = "https://nertivia.net/api/settings/status"
 
 class Channel(object):
     def __init__(self, channel, **kwargs):
-        self.cache = None
-        if kwargs.get("cache"):
-            self.cache = kwargs.get("cache")
-        self.http = http.HTTPClient(cache=self.cache)
+        self.http = http.HTTPClient()
         if "channel" in channel:
             self.id = channel["channel"]["channelID"]
             self.name = channel["channel"]["name"]

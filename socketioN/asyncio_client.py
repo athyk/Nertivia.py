@@ -2,6 +2,7 @@ import asyncio
 import logging
 import random
 
+import cache_nertivia_data
 import engineioN
 import nertivia
 
@@ -60,6 +61,7 @@ class AsyncClient(client.Client):
                             fatal errors are logged even when
                             ``engineio_logger`` is ``False``.
     """
+
     def is_asyncio_based(self):
         return True
 
@@ -298,7 +300,7 @@ class AsyncClient(client.Client):
         # later in _handle_eio_disconnect we invoke the disconnect handler
         for n in self.namespaces:
             await self._send_packet(packet.Packet(packet.DISCONNECT,
-                                    namespace=n))
+                                                  namespace=n))
         await self.eio.disconnect(abort=True)
 
     def start_background_task(self, target, *args, **kwargs):
@@ -421,29 +423,22 @@ class AsyncClient(client.Client):
         # first see if we have an explicit handler for the event
         ret = None
         if event == "server:joined":
-            self.guilds[str(args[0]["server_id"])] = nertivia.Server(args[0])
+            cache_nertivia_data.guilds[str(args[0]["server_id"])] = nertivia.Server(args[0])
         elif event == "success":
 
             servers = args[0]["user"]["servers"]
 
             for guild in servers:
                 try:
-                    self.guilds[guild["server_id"]] = nertivia.Server(guild)
+                    cache_nertivia_data.guilds[guild["server_id"]] = nertivia.Server(guild)
                 except Exception as e:
                     print(e)
 
             members = args[0]["serverMembers"]
             for member in members:
-                self.users[member["member"]["id"]] = nertivia.User(member["member"])
+                cache_nertivia_data.users[member["member"]["id"]] = nertivia.User(member["member"])
         if event == "server:member_add":
-            self.users[str(args[0]["member"]["id"])] = nertivia.User(args[0])
-
-        cache = nertivia.cache.Cache(guilds=self.guilds, users=self.users, channels=self.channels)
-
-        if event == "server:member_remove":
-            self.users.pop(str(args[0]["id"]), None)
-        if event == "server:leave":
-            self.guilds.pop(str(args[0]["server_id"]), None)
+            cache_nertivia_data.users[str(args[0]["member"]["id"])] = nertivia.User(args[0])
 
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
@@ -451,7 +446,7 @@ class AsyncClient(client.Client):
                     for handler in self.handlers[namespace][event]:
                         try:
                             if event == "receiveMessage":
-                                ret = await handler(nertivia.message.Message(*args, cache=cache))
+                                ret = await handler(nertivia.message.Message(*args))
                             elif event == "success":
                                 ret = await handler(nertivia.user.User(*args))
                             else:
@@ -465,7 +460,7 @@ class AsyncClient(client.Client):
                 try:
                     for handler in self.handlers[namespace][event]:
                         if event == "receiveMessage":
-                            ret = await handler(nertivia.message.Message(*args, cache=cache))
+                            ret = await handler(nertivia.message.Message(*args))
                         else:
                             ret = await handler(*args)
                 except Exception as e:

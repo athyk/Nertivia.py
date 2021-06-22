@@ -13,12 +13,9 @@ class Message:
     # __slots__ = ('id', 'content', 'author')
 
     def __init__(self, message, **kwargs):
-        self.cache = None
-        if kwargs.get("cache"):
-            self.cache = kwargs.get("cache")
         self.id: int = message['message']['messageID']
         self.content: str = message['message']['message']
-        self.http = nertivia.bot.HTTPClient(cache=self.cache)
+        self.http = nertivia.bot.HTTPClient()
         self.channel: nertivia.Channel = self.http.get_channel(message["message"]["channelID"])
         self.server: nertivia.Server = self.channel.server
         self.author: str = message['message']['creator']['username'] + '@' + message['message']['creator']['tag']

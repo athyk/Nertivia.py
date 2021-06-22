@@ -1,0 +1,3 @@
+users = {}
+members = {}
+guilds = {}

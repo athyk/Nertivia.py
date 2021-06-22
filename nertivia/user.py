@@ -1,8 +1,5 @@
 class User(object):
     def __init__(self, user, **kwargs):
-        self.cache = None
-        if kwargs.get("cache"):
-            self.cache = kwargs.get("cache")
         if "user" not in user:
             user = {"user": user}
 

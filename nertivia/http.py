@@ -1,7 +1,7 @@
 import asyncio
 import gc
 import json
-
+import cache_nertivia_data
 import aiohttp
 import nest_asyncio
 import requests
@@ -79,9 +79,6 @@ class HTTPClient:
             URL = f"{socket_ip}/api/channels/"
             URL_MSG = f"{socket_ip}/api/messages/"
             URL_STA = f"{socket_ip}/api/settings/status"
-        self.cache = None
-        if kwargs.get("cache"):
-            self.cache = kwargs.get("cache")
         self.token = None
         self.user = {}
         self._servers = {}
@@ -147,22 +144,22 @@ class HTTPClient:
         if res.status != 200:
             return res.content
         await session.close()
-        return nertivia.message.Message({'message': await res.json()}, cache=self.cache)
+        return nertivia.message.Message({'message': await res.json()})
 
     def get_channel(self, channel_id):
         res = asyncio.run(fetch_channel(channel_id))
-        return nertivia.Channel(res, cache=self.cache)
+        return nertivia.Channel(res)
 
     def get_user(self, user_id):
         res = asyncio.run(fetch_user(user_id))
-        return nertivia.User(res, cache=self.cache)
+        return nertivia.User(res)
 
     def get_server(self, server_id):
         res = None
-        if str(server_id) in self.cache.guilds:
-            res = self.cache.guilds[str(server_id)]
+        if str(server_id) in cache_nertivia_data.guilds:
+            res = cache_nertivia_data.guilds[str(server_id)]
         else:
-            res = nertivia.Server(asyncio.run(fetch_server(server_id)), cache=self.cache)
+            res = nertivia.Server(asyncio.run(fetch_server(server_id)))
 
         return res
 
