@@ -466,6 +466,10 @@ class AsyncClient(client.Client):
                 except Exception as e:
                     print(e)
                     self.handlers[namespace][event](*args)
+            if event == "server:member_remove":
+                cache_nertivia_data.users.remove(str(args[0]["member"]["id"]))
+            if event == "server:leave":
+                cache_nertivia_data.guilds.remove(str(args[0]["server_id"]))
             return ret
 
         # or else, forward the event to a namepsace handler if one exists
