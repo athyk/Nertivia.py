@@ -1,3 +1,4 @@
 users = {}
 members = {}
 guilds = {}
+messages = {}

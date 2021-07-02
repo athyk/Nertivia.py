@@ -437,16 +437,20 @@ class AsyncClient(client.Client):
             members = args[0]["serverMembers"]
             for member in members:
                 cache_nertivia_data.users[member["member"]["id"]] = nertivia.User(member["member"])
+        if event == "receiveMessage":
+            cache_nertivia_data.messages[str(args[0]["message"]["messageID"])] = nertivia.message.Message(*args)
         if event == "server:member_add":
             cache_nertivia_data.users[str(args[0]["member"]["id"])] = nertivia.User(args[0])
-
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
                     for handler in self.handlers[namespace][event]:
+                        print(handler)
                         try:
                             if event == "receiveMessage":
                                 ret = await handler(nertivia.message.Message(*args))
+                            elif event == "delete_message":
+                                ret = await handler(cache_nertivia_data.messages[str(args[0]["messageID"])])
                             elif event == "success":
                                 ret = await handler(nertivia.user.User(*args))
                             else:
@@ -459,23 +463,29 @@ class AsyncClient(client.Client):
             else:
                 try:
                     for handler in self.handlers[namespace][event]:
+                        print(handler)
                         if event == "receiveMessage":
                             ret = await handler(nertivia.message.Message(*args))
+                        elif event == "delete_message":
+                            ret = await handler(cache_nertivia_data.messages[str(args[0]["messageID"])])
                         else:
                             ret = await handler(*args)
                 except Exception as e:
                     print(e)
                     self.handlers[namespace][event](*args)
-            if event == "server:member_remove":
-                cache_nertivia_data.users.remove(str(args[0]["member"]["id"]))
-            if event == "server:leave":
-                cache_nertivia_data.guilds.remove(str(args[0]["server_id"]))
-            return ret
+
+        if event == "delete_message":
+            del cache_nertivia_data.messages[str(args[0]["messageID"])]
+        if event == "server:member_remove":
+            del cache_nertivia_data.users[(str(args[0]["member"]["id"]))]
+        if event == "server:leave":
+            del cache_nertivia_data.guilds[str(args[0]["server_id"])]
 
         # or else, forward the event to a namepsace handler if one exists
-        elif namespace in self.namespace_handlers:
+        if namespace in self.namespace_handlers:
             return await self.namespace_handlers[namespace].trigger_event(
                 event, *args)
+        return ret
 
     async def _handle_reconnect(self):
         if self._reconnect_abort is None:  # pragma: no cover
