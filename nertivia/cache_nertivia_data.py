@@ -6,7 +6,7 @@ guilds = {}
 
 
 class LimitedCache(OrderedDict):
-    def __init__(self, maxsize=10, /, *args, **kwds):
+    def __init__(self, maxsize=100, /, *args, **kwds):
         self.maxsize = maxsize
         super().__init__(*args, **kwds)
 

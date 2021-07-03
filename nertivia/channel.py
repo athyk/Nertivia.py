@@ -29,6 +29,6 @@ class Channel(object):
     async def send(self, message):
         await self.http.send_message(self.id, message)
 
-    async def get_message(self, messageID):
+    async def get_message(self, message_id):
         # mes = list(filter(lambda x: x['messageID'] == messageID, r.json()['messages']))
-        return await self.http.get_message(messageID, self.id)
+        return await self.http.get_message(message_id, self.id)

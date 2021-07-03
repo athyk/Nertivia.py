@@ -142,8 +142,14 @@ class HTTPClient:
         res = await session.get(url=str(f'{MAIN_URL}/api/messages/{message_id}/channels/{channel_id}'),
                                 headers=headers)
         if res.status != 200:
-            return res.content
+            try:
+                if "content" in res:
+                    return res.content
+            except:
+                pass
+            return None
         await session.close()
+
         return nertivia.message.Message({'message': await res.json()})
 
     def get_channel(self, channel_id):
