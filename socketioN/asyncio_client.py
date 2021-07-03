@@ -445,12 +445,13 @@ class AsyncClient(client.Client):
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
                     for handler in self.handlers[namespace][event]:
-                        print(handler)
                         try:
                             if event == "receiveMessage":
                                 ret = await handler(nertivia.message.Message(*args))
                             elif event == "delete_message":
-                                ret = await handler(cache_nertivia_data.messages[str(args[0]["messageID"])])
+                                print("--")
+
+                                ret = await handler(cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"])))
                             elif event == "success":
                                 ret = await handler(nertivia.user.User(*args))
                             else:
@@ -463,11 +464,13 @@ class AsyncClient(client.Client):
             else:
                 try:
                     for handler in self.handlers[namespace][event]:
-                        print(handler)
                         if event == "receiveMessage":
                             ret = await handler(nertivia.message.Message(*args))
                         elif event == "delete_message":
-                            ret = await handler(cache_nertivia_data.messages[str(args[0]["messageID"])])
+                            try:
+                                ret = await handler(cache_nertivia_data.messages[str(args[0]["messageID"])])
+                            except:
+                                pass
                         else:
                             ret = await handler(*args)
                 except Exception as e:
@@ -475,7 +478,7 @@ class AsyncClient(client.Client):
                     self.handlers[namespace][event](*args)
 
         if event == "delete_message":
-            del cache_nertivia_data.messages[str(args[0]["messageID"])]
+            cache_nertivia_data.messages.pop(str(args[0]["messageID"]))
         if event == "server:member_remove":
             del cache_nertivia_data.users[(str(args[0]["member"]["id"]))]
         if event == "server:leave":
