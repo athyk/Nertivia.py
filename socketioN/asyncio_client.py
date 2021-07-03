@@ -449,8 +449,6 @@ class AsyncClient(client.Client):
                             if event == "receiveMessage":
                                 ret = await handler(nertivia.message.Message(*args))
                             elif event == "delete_message":
-                                print("--")
-
                                 ret = await handler(cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"])))
                             elif event == "success":
                                 ret = await handler(nertivia.user.User(*args))
