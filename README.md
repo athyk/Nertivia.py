@@ -13,19 +13,24 @@ You can install `PNA` with pip using
 ```py
 import nertivia
 
-token = "BOT TOKEN"
+token = ""
 
-client = nertivia.Bot()
+client = nertivia.Bot(debug=False)  # Change to True to enable viewing of events, information
 
 
 @client.event
-async def on_ready(data: nertivia.User):
-    print("Logged in as", data.username, "\nid:", data.id)
+async def on_ready():
+    print("Logged in as", client.user.username)
 
 
 @client.event
 async def on_quit():
     print("I'm disconnected!")
+
+
+@client.event
+async def on_status_change(data):
+    print(data)
 
 
 @client.event
