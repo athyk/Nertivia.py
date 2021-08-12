@@ -2,12 +2,10 @@ class User(object):
     def __init__(self, user, **kwargs):
         if "user" not in user:
             user = {"user": user}
-
         if "uniqueID" in user["user"]:
             self.id = user['user']['uniqueID']
         else:
             self.id = user['user']['id']
-
         self.username = user['user']['username']
         self.tag = user['user']['tag']
         if "bot" in user["user"]:

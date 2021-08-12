@@ -3,7 +3,7 @@ from collections import OrderedDict
 users = {}
 members = {}
 guilds = {}
-
+user = {}
 
 class LimitedCache(OrderedDict):
     def __init__(self, maxsize=500, /, *args, **kwds):

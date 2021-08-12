@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import random
+import traceback
 
 import engineioN
 import nertivia.cache_nertivia_data
@@ -417,6 +418,17 @@ class AsyncClient(client.Client):
             self.namespaces = {}
             self.connected = False
 
+    async def _call_event(self, event, namespace, data=None):
+        namespace = namespace or '/'
+        self.logger.info('Received custom event "%s" [%s]', event, namespace)
+        try:
+            if data:
+                r = await self._trigger_event(event, namespace, data)
+            else:
+                r = await self._trigger_event(event, namespace)
+        except Exception as e:
+            print(traceback.format_exc())
+
     async def _trigger_event(self, event, namespace, *args):
         """Invoke an application event handler."""
         # first see if we have an explicit handler for the event
@@ -430,14 +442,21 @@ class AsyncClient(client.Client):
             for guild in servers:
                 try:
                     nertivia.cache_nertivia_data.guilds[guild["server_id"]] = nertivia.Server(guild)
+
                 except Exception as e:
-                    print(e)
+                    print(traceback.format_exc())
 
             members = args[0]["serverMembers"]
             for member in members:
                 nertivia.cache_nertivia_data.users[member["member"]["id"]] = nertivia.User(member["member"])
+            nertivia.cache_nertivia_data.user = nertivia.User(args[0]["user"])
+
+            await self._call_event("update_bot_user", "/", nertivia.cache_nertivia_data.user)
+            await self._call_event("on_ready", "/")
+
         if event == "receiveMessage":
-            nertivia.cache_nertivia_data.messages[str(args[0]["message"]["messageID"])] = nertivia.message.Message(*args)
+            nertivia.cache_nertivia_data.messages[str(args[0]["message"]["messageID"])] = nertivia.message.Message(
+                *args)
         if event == "server:member_add":
             nertivia.cache_nertivia_data.users[str(args[0]["member"]["id"])] = nertivia.User(args[0])
         if namespace in self.handlers and event in self.handlers[namespace]:
@@ -448,7 +467,8 @@ class AsyncClient(client.Client):
                             if event == "receiveMessage":
                                 ret = await handler(nertivia.message.Message(*args))
                             elif event == "delete_message":
-                                ret = await handler(nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"])))
+                                ret = await handler(
+                                    nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"])))
                             elif event == "success":
                                 ret = await handler(nertivia.user.User(*args))
                             else:
@@ -456,8 +476,9 @@ class AsyncClient(client.Client):
                         except asyncio.CancelledError:  # pragma: no cover
                             ret = None
                 except Exception as e:
-                    print(e)
+
                     await self.handlers[namespace][event](*args)
+                    print(traceback.format_exc())
             else:
                 try:
                     for handler in self.handlers[namespace][event]:
@@ -471,7 +492,6 @@ class AsyncClient(client.Client):
                         else:
                             ret = await handler(*args)
                 except Exception as e:
-                    print(e)
                     self.handlers[namespace][event](*args)
 
         if event == "delete_message":
