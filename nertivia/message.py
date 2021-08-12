@@ -20,6 +20,8 @@ class Message:
         self.server: nertivia.Server = self.channel.server
         self.author: str = message['message']['creator']['username'] + '@' + message['message']['creator']['tag']
 
+    def __repr__(self):
+        return f"<id={self.id} content={self.content} channel=<{self.channel.__repr__()}> server=<{self.server.__repr__()}> author={self.author}"
 
 
     @property

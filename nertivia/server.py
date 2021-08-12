@@ -9,6 +9,9 @@ class Server(object):
         self.name = server['name']
         self.default_channel: nertivia.Channel = server['default_channel_id']
 
+    def __repr__(self):
+        return f"<id={self.id} name={self.name} default_channel=<{self.default_channel}>>"
+
     @property
     def _id(self):
         return self.id

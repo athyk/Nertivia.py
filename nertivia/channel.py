@@ -20,11 +20,13 @@ class Channel(object):
         else:
             self.id = channel["channelID"]
             self.name = channel["name"]
-            self.name = channel["name"]
             self.server = self.http.get_server(channel["server_id"])
             if "timestamp" in channel:
                 self.last_messaged = channel["timestamp"]
             self._channel = channel
+
+    def __repr__(self):
+        return f"<id={self.id} name={self.name} server=<{self.server.__repr__()}>>"
 
     async def send(self, message):
         await self.http.send_message(self.id, message)
