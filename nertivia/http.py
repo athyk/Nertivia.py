@@ -19,6 +19,7 @@ headers = {}
 
 loop = asyncio.get_event_loop()
 
+session = aiohttp.ClientSession()
 
 def get_sid(token):
     r = requests.get(url=str(URL + "app"), headers={'Accept': 'text/plain',
@@ -111,34 +112,28 @@ class HTTPClient:
         gc.collect()
 
     async def delete_message(self, message_id, channel_id):
-        session = aiohttp.ClientSession()
         res = await session.delete(url=str(URL_MSG + str(message_id) + '/channels/' + str(channel_id)),
                                    headers=headers)
-        await session.close()
         if res.status != 200:
             return res.content
 
     async def edit_message(self, message_id, channel_id, content):
-        session = aiohttp.ClientSession()
+
         res = await session.patch(url=str(URL_MSG + str(message_id) + '/channels/' + str(channel_id)),
                                   headers=headers,
                                   data=json.dumps({'message': content}))
-        await session.close()
         if res.status != 200:
             return res.content
 
     async def send_message(self, channel_id, content):
-        session = aiohttp.ClientSession()
         res = await session.post(url=str(URL_MSG + '/channels/' + str(channel_id)),
                                  data=json.dumps({"message": content}),
                                  headers=headers)
-        await session.close()
         if res.status != 200:
             return res.content
         return res.content
 
     async def get_message(self, message_id, channel_id):
-        session = aiohttp.ClientSession()
         res = await session.get(url=str(f'{MAIN_URL}/api/messages/{message_id}/channels/{channel_id}'),
                                 headers=headers)
         if res.status != 200:
@@ -148,7 +143,6 @@ class HTTPClient:
             except:
                 pass
             return None
-        await session.close()
 
         return nertivia.message.Message({'message': await res.json()})
 

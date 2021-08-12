@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import traceback
 
 import socketioN
 from .http import HTTPClient
@@ -62,19 +63,22 @@ class Bot:
         return await self.http.get_user(userID)
 
     def on(self, event, handler=None, namespace=None):
-        namespace = namespace or '/'
+        try:
+            namespace = namespace or '/'
 
-        def set_handler(handler):
-            if namespace not in self.sio.handlers:
-                self.sio.handlers[namespace] = {}
-            if event not in self.sio.handlers[namespace]:
-                self.sio.handlers[namespace][event] = []
-            self.sio.handlers[namespace][event].append(handler)
-            return handler
+            def set_handler(handler):
+                if namespace not in self.sio.handlers:
+                    self.sio.handlers[namespace] = {}
+                if event not in self.sio.handlers[namespace]:
+                    self.sio.handlers[namespace][event] = []
+                self.sio.handlers[namespace][event].append(handler)
+                return handler
 
-        if handler is None:
-            return set_handler
-        set_handler(handler)
+            if handler is None:
+                return set_handler
+            set_handler(handler)
+        except Exception as e:
+            print(traceback.print_exception())
 
     def event(self, *args):
 
