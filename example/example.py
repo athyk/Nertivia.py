@@ -6,8 +6,8 @@ client = nertivia.Bot(debug=False)  # Change to True to enable viewing of events
 
 
 @client.event
-async def on_ready(data: nertivia.User):
-    print("Logged in as", data.username, "\nid:", data.id)
+async def on_ready():
+    print("Logged in as", client.user.username)
 
 
 @client.event
