@@ -26,7 +26,7 @@ class Channel(object):
             self._channel = channel
 
     def __repr__(self):
-        return f"<id={self.id} name={self.name} server=<{self.server.__repr__()}>>"
+        return f"<id={self.id} name='{self.name}' server=<{self.server.__repr__()}>>"
 
     async def send(self, message):
         await self.http.send_message(self.id, message)

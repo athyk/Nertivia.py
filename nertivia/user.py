@@ -15,6 +15,9 @@ class User(object):
         self.avatar_url = "https://nertivia.net/api/avatars/{}".format(user['user']['avatar'])
         self.user = "{}@{}".format(user['user']['username'], user['user']['tag'])
 
+    def __repr__(self):
+        return f"<id={self.id} username='{self.username}' tag='{self.tag}' avatar_url='{self.avatar_url}' user='{self.user}' bot={self.bot}>"
+
     @property
     def _id(self):
         return self.id
