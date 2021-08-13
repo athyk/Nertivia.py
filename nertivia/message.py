@@ -13,12 +13,20 @@ class Message:
     # __slots__ = ('id', 'content', 'author')
 
     def __init__(self, message, **kwargs):
-        self.id: int = message['message']['messageID']
-        self.content: str = message['message']['message']
-        self.http = nertivia.bot.HTTPClient()
-        self.channel: nertivia.Channel = self.http.get_channel(message["message"]["channelID"])
-        self.server: nertivia.Server = self.channel.server
-        self.author: str = message['message']['creator']['username'] + '@' + message['message']['creator']['tag']
+        if "message" in message:
+            self.id: int = message['message']['messageID']
+            self.content: str = message['message']['message']
+            self.http = nertivia.bot.HTTPClient()
+            self.channel: nertivia.Channel = self.http.get_channel(message["message"]["channelID"])
+            self.server: nertivia.Server = self.channel.server
+            self.author: str = message['message']['creator']['username'] + '@' + message['message']['creator']['tag']
+        else:
+            self.id: int = message['messageID']
+            self.content: str = message['message']
+            self.http = nertivia.bot.HTTPClient()
+            self.channel: nertivia.Channel = self.http.get_channel(message["channelID"])
+            self.server: nertivia.Server = self.channel.server
+            self.author: str = message['creator']['username'] + '@' + message['creator']['tag']
 
     def __repr__(self):
         return f"<id={self.id} content='{self.content}' channel=<{self.channel.__repr__()}> server=<{self.server.__repr__()}> author='{self.author}'>"

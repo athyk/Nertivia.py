@@ -5,6 +5,7 @@ import traceback
 
 import engineioN
 import nertivia.cache_nertivia_data
+import nertivia.message
 
 from . import client
 from . import exceptions
@@ -372,7 +373,10 @@ class AsyncClient(client.Client):
     async def _handle_event(self, namespace, id, data):
         namespace = namespace or '/'
         self.logger.info('Received event "%s" [%s]', data[0], namespace)
-        r = await self._trigger_event(data[0], namespace, *data[1:])
+        try:
+            r = await self._trigger_event(data[0], namespace, *data[1:])
+        except Exception:
+            print(traceback.format_exc())
         if id is not None:
             # send ACK packet with the response returned by the handler
             # tuples are expanded as multiple arguments
@@ -459,6 +463,18 @@ class AsyncClient(client.Client):
                 *args)
         if event == "server:member_add":
             nertivia.cache_nertivia_data.users[str(args[0]["member"]["id"])] = nertivia.User(args[0])
+        # ["update_message",{"channelID":"6802723449891459072","message":"91a",
+        # "creator":{"id":"6597216273183019008","username":"FluxedScript","tag":"0000","avatar":"6597216273183019008/6721500359669321728/avatar.png","badges":8},
+        # "created":1628775136388, "mentions":[],"quotes":[],"messageID":"6831578069652738048",
+        # "timeEdited":1628861635958,"files":[],"embed":0}]
+        # noinspection PyTypeChecker
+        before_message = None
+        # noinspection PyTypeChecker
+        after_message = None
+        if event == "update_message":
+            before_message: nertivia.message.Message = nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"]))
+            nertivia.cache_nertivia_data.messages[str(args[0]["messageID"])] = nertivia.message.Message({"message": args[0]})
+            after_message: nertivia.message.Message = nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"]))
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
@@ -469,6 +485,8 @@ class AsyncClient(client.Client):
                             elif event == "delete_message":
                                 ret = await handler(
                                     nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"])))
+                            elif event == "update_message":
+                                ret = await handler(before_message, after_message)
                             elif event == "success":
                                 ret = await handler(nertivia.user.User(*args))
                             else:
@@ -484,6 +502,8 @@ class AsyncClient(client.Client):
                     for handler in self.handlers[namespace][event]:
                         if event == "receiveMessage":
                             ret = await handler(nertivia.message.Message(*args))
+                        elif event == "update_message":
+                            ret = await handler(before_message, after_message)
                         elif event == "delete_message":
                             try:
                                 ret = await handler(nertivia.cache_nertivia_data.messages[str(args[0]["messageID"])])
