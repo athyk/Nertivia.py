@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 
 requirements: list = ["setuptools", "requests", "nest_asyncio", "six>=1.9.0", "websocket-client>=0.54.0",
-                      "websockets>=7.0", "aiohttp>=3.4", "six>=1.9.0", "bidict"]
+                      "websockets>=7.0", "aiohttp>=3.4", "bidict"]
 
 setuptools.setup(
     name='pna',  # How you named your package folder (MyLib)
