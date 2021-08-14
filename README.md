@@ -6,7 +6,8 @@ Support Server: https://nertivia.net/i/pna
 
 ## Installation
 You can install `PNA` with pip using
-`pip install PNA` or `pip3 install PNA`
+
+`pip install PNA` or `pip3 install PNA` once completed make sure you import it to your Python file with `import nertivia`.
 
 ## Example Bot
 
