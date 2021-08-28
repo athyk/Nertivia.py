@@ -1,14 +1,25 @@
 import nertivia
 from nertivia import http
 
+# Official Nertivia Server endpoints, Consider having the first part be variable and changeable from a central location
 URL = "https://nertivia.net/api/messages/channels/"
 URL_MSG = "https://nertivia.net/api/messages/"
 URL_STA = "https://nertivia.net/api/settings/status"
 
 
 class Channel(object):
+    """
+    Class defining a Channel, not expected to be manually instantiated
+    """
     def __init__(self, channel, **kwargs):
+        """
+        Creates a new channel object, takes in a dictionary containing full Channel information
+        """
+        # Set the channel http attribute to the http object to simplify sending or retrieving of messages
         self.http = http.HTTPClient()
+
+        # Set all of the properties of the channel in a self.x blob, consider cleaning up if possible
+        # If a Channel object is provided in the arguments, then just extract all of its information
         if "channel" in channel:
             self.id = channel["channel"]["channelID"]
             self.name = channel["channel"]["name"]
@@ -17,6 +28,8 @@ class Channel(object):
             self.server: nertivia.Server = self.http.get_server(channel["channel"]["server_id"])
             self.last_messaged = channel["channel"]["timestamp"]
             self._channel = channel["channel"]
+
+        # If it is a new Channel object, then we have less information to set and use what was provided
         else:
             self.id = channel["channelID"]
             self.name = channel["name"]
@@ -26,11 +39,22 @@ class Channel(object):
             self._channel = channel
 
     def __repr__(self):
-        return f"<id={self.id} name='{self.name}' server=<{self.server.__repr__()}>>"
+        """
+        Allow for channel to be used in strings
+        """
+        # Self.server removed .__repr__ as repr will be returned when used in this context
+        return f"<id={self.id} name='{self.name}' server=<{self.server}>>"
 
     async def send(self, message):
+        """
+        Asynchronously send a message in a channel
+        """
+        # Throw it to the http object
         await self.http.send_message(self.id, message)
 
     async def get_message(self, message_id):
-        # mes = list(filter(lambda x: x['messageID'] == messageID, r.json()['messages']))
+        """
+        Asynchronously retrieve a message from a channel using its id
+        """
+        # Throw it to the http object
         return await self.http.get_message(message_id, self.id)
