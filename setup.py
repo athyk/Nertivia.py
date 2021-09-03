@@ -8,13 +8,13 @@ requirements: list = ["setuptools", "requests", "nest_asyncio", "six>=1.9.0", "w
                       "websockets>=7.0", "aiohttp>=3.4", "bidict"]
 
 setuptools.setup(
-    name='pna',  # How you named your package folder (MyLib)
+    name='nertivia',  # How you named your package folder (MyLib)
     version='0.2.6',  # Start with a small number and increase it with every change you make
     license='apache-2.0',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='Python API Wrapper for Nertivia to make bots',  # Give a short description about your library
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/FluxedScript/PNA/",
+    url="https://github.com/Nertivia-PY/Nertivia.py/",
     author='FluxedScript',  # Type in your name
     keywords=['API Wrapper', 'SIMPLE', 'PYTHON', "nertivia"],  # Keywords that define your package best
     package_dir={"socketioN": "socketioN"},
