@@ -1,6 +1,6 @@
 # Nertivia.py
 
-This is a Python API Wrapper for the Nertiva chat platform. The replaces the deprecated Nertivia.py api wrapper. 
+This is the official Python API Wrapper for the Nertiva chat platform.
 
 Support Server: https://nertivia.net/i/npy
 
