@@ -4,5 +4,4 @@ from .bot import *
 from .channel import *
 from .user import *
 from .server import *
-from .cache import *
 from .cache_nertivia_data import *
