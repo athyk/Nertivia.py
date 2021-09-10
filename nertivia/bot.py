@@ -51,7 +51,7 @@ class Bot:
         # Set self.http to the HTTP client connection object for future use
         self.http = HTTPClient(socket_ip=SOCKET_IP)
 
-        # Note : Consider moving around, if i forgot to remove this check feasability to move this upwards
+        # Note : Consider moving around, if i forgot to remove this check feasibility to move this upwards
         from .cache_nertivia_data import user
         self.user: User = user
         self.headers = {'Accept': 'text/plain',
@@ -73,13 +73,13 @@ class Bot:
         Asynchronous function initiating a (new) connection to Nertivia using the Token (str) passed as an argument
         """
 
-        # Start connection to SOCKET_IP, then send authentification header
+        # Start connection to SOCKET_IP, then send authentication header
         await self.sio.connect(SOCKET_IP, transports=['websocket'])
         await self.sio.emit('authentication', {'token': new_token})
         self.sio.on('update_bot_user', self.update_bot_user)
         a_sio = self.sio
 
-        # Wait for a response, if an authentification error has occurred auth_err() is called
+        # Wait for a response, if an authentication error has occurred auth_err() is called
         @a_sio.event
         def auth_err(data):
             print("Invalid Token")
@@ -175,23 +175,6 @@ class Bot:
                          "on_status_change": "member:custom_status_change", "on_message_delete": "delete_message",
                          "on_message_edit": "update_message"}
 
-        for Key, Value in HandledEvents:
+        for Key, Value in HandledEvents.items():
             if args[0].__name__ == Key:
                 return self.on(Value)(args[0])
-
-        '''
-        Above code should be able to work fine instead, leaving this in case a flaw is found
-        
-        if args[0].__name__ == "on_ready":
-            return self.on("on_ready")(args[0])
-        if args[0].__name__ == "on_message":
-            return self.on("receiveMessage")(args[0])
-        if args[0].__name__ == "on_quit":
-            return self.on("disconnect")(args[0])
-        if args[0].__name__ == "on_status_change":
-            return self.on("member:custom_status_change")(args[0])
-        if args[0].__name__ == "on_message_delete":
-            return self.on("delete_message")(args[0])
-        if args[0].__name__ == "on_message_edit":
-            return self.on("update_message")(args[0])
-        '''
