@@ -7,3 +7,4 @@
 /venv/
 **/__pycache__/
 /example/mainbot.py
+example/test.py
