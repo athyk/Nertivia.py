@@ -247,7 +247,10 @@ class HTTPClient:
         Channels are not cached ?
         Returns a nertivia.Channel object
         """
-        res = asyncio.run(fetch_channel(channel_id))
+        try:
+            res = asyncio.run(fetch_channel(channel_id))
+        except asyncio.TimeoutError:
+            res = asyncio.run(fetch_channel(channel_id))
         return nertivia.Channel(res)
 
     def get_user(self, user_id, force_cache: bool = False):

@@ -521,7 +521,10 @@ class AsyncClient(client.Client):
                         else:
                             ret = await handler(*args)
                 except Exception:
-                    self.handlers[namespace][event](*args)
+                    try:
+                        self.handlers[namespace][event](*args)
+                    except TypeError as e:
+                        print(e)
 
         if event == "delete_message":
             nertivia.cache_nertivia_data.messages.pop(str(args[0]["messageID"]))
