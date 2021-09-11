@@ -2,7 +2,9 @@ import nertivia
 
 token = ""
 
-client = nertivia.Bot(debug=False)  # Change to True to enable viewing of events, information
+# Change to True to enable viewing of events, information
+
+client = nertivia.Bot(debug=False)
 
 
 @client.event

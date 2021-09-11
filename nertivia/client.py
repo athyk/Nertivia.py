@@ -1,5 +1,5 @@
 import requests
-from .user import *
+from .user import User
 import socketioN
 
 # Nertivia server endpoint

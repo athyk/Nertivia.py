@@ -31,7 +31,8 @@ class User(object):
         """
         Returns a representation of the object
         """
-        return f"<id={self.id} username='{self.username}' tag='{self.tag}' avatar_url='{self.avatar_url}' user='{self.user}' bot={self.bot}>"
+        return f"<id={self.id} username='{self.username}' tag='{self.tag}' " \
+               f"avatar_url='{self.avatar_url}' user='{self.user}' bot={self.bot}>"
 
     @property
     def _id(self):
