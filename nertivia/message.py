@@ -23,7 +23,12 @@ class Message:
 
         if "message" in message:
             self.id: int = message['message']['messageID']
-            self.content: str = message['message']['message']
+            if "message" in message['message']:
+                self.content: str = message['message']['message']
+            else:
+                self.content: str = ""
+            if "files" in message['message']:
+                self.files = message["message"]["files"]
             self.channel: nertivia.Channel = self.http.get_channel(message["message"]["channelID"])
             self.author: str = message['message']['creator']['username'] + '@' + message['message']['creator']['tag']
 
