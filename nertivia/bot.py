@@ -160,7 +160,8 @@ class Bot:
             set_handler(handler)
 
         # In case something unexpected happened, we catch it and print the error
-        except Exception as e:
+        except Exception:
+            # noinspection PyArgumentList
             print(traceback.print_exception())
 
     def event(self, *args):

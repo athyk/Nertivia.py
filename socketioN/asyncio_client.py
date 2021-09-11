@@ -66,6 +66,7 @@ class AsyncClient(client.Client):
     def is_asyncio_based(self):
         return True
 
+    # flake8: noqa: C901
     async def connect(self, url, headers={}, auth=None, transports=None,
                       namespaces=None, socketio_path='socket.io', wait=True,
                       wait_timeout=1):
@@ -430,9 +431,12 @@ class AsyncClient(client.Client):
                 r = await self._trigger_event(event, namespace, data)
             else:
                 r = await self._trigger_event(event, namespace)
-        except Exception as e:
+            return r
+        except Exception:
             print(traceback.format_exc())
+            return None
 
+    # flake8: noqa: C901
     async def _trigger_event(self, event, namespace, *args):
         """Invoke an application event handler."""
         # first see if we have an explicit handler for the event
@@ -447,7 +451,7 @@ class AsyncClient(client.Client):
                 try:
                     nertivia.cache_nertivia_data.guilds[guild["server_id"]] = nertivia.Server(guild)
 
-                except Exception as e:
+                except Exception:
                     print(traceback.format_exc())
 
             members = args[0]["serverMembers"]
@@ -472,9 +476,15 @@ class AsyncClient(client.Client):
         # noinspection PyTypeChecker
         after_message = None
         if event == "update_message":
-            before_message: nertivia.message.Message = nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"]))
-            nertivia.cache_nertivia_data.messages[str(args[0]["messageID"])] = nertivia.message.Message({"message": args[0]})
-            after_message: nertivia.message.Message = nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"]))
+            before_message: nertivia.message.Message = \
+                nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"]))
+
+            nertivia.cache_nertivia_data.messages[str(args[0]["messageID"])] = \
+                nertivia.message.Message({"message": args[0]})
+
+            after_message: nertivia.message.Message = \
+                nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"]))
+
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
@@ -493,8 +503,7 @@ class AsyncClient(client.Client):
                                 ret = await handler(*args)
                         except asyncio.CancelledError:  # pragma: no cover
                             ret = None
-                except Exception as e:
-
+                except Exception:
                     await self.handlers[namespace][event](*args)
                     print(traceback.format_exc())
             else:
@@ -507,11 +516,11 @@ class AsyncClient(client.Client):
                         elif event == "delete_message":
                             try:
                                 ret = await handler(nertivia.cache_nertivia_data.messages[str(args[0]["messageID"])])
-                            except:
+                            except Exception:
                                 pass
                         else:
                             ret = await handler(*args)
-                except Exception as e:
+                except Exception:
                     self.handlers[namespace][event](*args)
 
         if event == "delete_message":

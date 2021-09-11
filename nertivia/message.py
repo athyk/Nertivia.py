@@ -1,8 +1,5 @@
-import asyncio
-
 import nertivia
 import nertivia.bot
-from nertivia import http
 
 # asyncio and nertivia.http unused ?
 
@@ -42,7 +39,8 @@ class Message:
         """
         Return a representation of the class Instance
         """
-        return f"<id={self.id} content='{self.content}' channel=<{self.channel.__repr__()}> server=<{self.server.__repr__()}> author='{self.author}'>"
+        return f"<id={self.id} content='{self.content}' channel=<{self.channel.__repr__()}> " \
+               f"server=<{self.server.__repr__()}> author='{self.author}'>"
 
     @property
     def _id(self):

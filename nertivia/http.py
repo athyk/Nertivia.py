@@ -234,7 +234,7 @@ class HTTPClient:
                 if "content" in res:
                     return res.content
             # Error shouldn't be possible unless res is None
-            except:
+            except Exception:
                 pass
             return None
 
@@ -274,4 +274,3 @@ class HTTPClient:
             return nertivia.Server(asyncio.run(fetch_server(server_id)))
 
         return None
-
