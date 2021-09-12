@@ -1,5 +1,6 @@
 import nertivia
 import nertivia.bot
+from nertivia import http
 
 # asyncio and nertivia.http unused ?
 
