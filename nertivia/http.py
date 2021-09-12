@@ -101,7 +101,7 @@ async def fetch_user(user_id):
     if res.status != 200:
         return res.content
 
-    # However, if succesful return the json data that was returned and transform it into its python equivalent
+    # However, if successful return the json data that was returned and transform it into its python equivalent
     return await res.json()
 
 

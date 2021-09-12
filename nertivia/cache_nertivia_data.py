@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from typing import TypedDict
 # The following dictionaries hold all cached information relative to their name
 from .user import User
 from .server import Server

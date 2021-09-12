@@ -5,6 +5,7 @@ import traceback
 import socketioN
 from .http import HTTPClient
 from .user import User
+
 default_logger = logging.getLogger('nertivia')
 
 SOCKET_IP = "https://nertivia.net"
@@ -36,6 +37,7 @@ class Bot:
 
         # Check if a local server is being used to test Nertivia features (Address hardcoded to be the default one)
         if args.get("test"):
+            # noinspection HttpUrlsUsage
             SOCKET_IP = "http://server.localtest.me"
 
         # Check if the library user desires mass information logging for debug purposes, if so initialises the client
@@ -81,10 +83,12 @@ class Bot:
         @a_sio.event
         def auth_err(data):
             print("Invalid Token")
+
         @a_sio.event
         async def sid(data):
             print("sid")
             await self.sio.emit('authentication', {'token': new_token})
+
         await a_sio.wait()
 
     def update_bot_user(self, data):
@@ -138,6 +142,7 @@ class Bot:
             namespace = namespace or '/'
 
             # Set a Handler to an event, handlers are set in the dictionary mess inside of sio.handlers
+            # noinspection PyShadowingNames
             def set_handler(handler):
                 # If namespace doesn't exist in the handlers dictionary, we create a dictionary for it before moving on
                 if namespace not in self.sio.handlers:
