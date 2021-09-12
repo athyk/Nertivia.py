@@ -211,13 +211,11 @@ class HTTPClient:
         res = await session.post(url=str(URL_MSG + '/channels/' + str(channel_id)),
                                  data=json.dumps({"message": content}),
                                  headers=headers)
-
         # Reminder : if 2XX then it is a success
         if res.status != 200:
-            return res.content
-
+            return res
         # If successful return...Success message ? Not sure
-        return res.content
+        return res
 
     async def get_message(self, message_id, channel_id):
         """

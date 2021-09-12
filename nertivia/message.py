@@ -24,7 +24,6 @@ class Message:
             self.http = kwargs['http']
         else:
             self.http = http.HTTPClient()
-
         if "message" in message:
             self.id: int = message['message']['messageID']
             if "message" in message['message']:
@@ -76,7 +75,9 @@ class Message:
         Send a new message using a message
         Do not call manually
         """
-        await self.http.send_message(self.channel.id, message)
+        message = await self.http.send_message(self.channel.id, message)
+        message_json = await message.json()
+        return Message({"message": message_json["messageCreated"]})
 
     async def delete(self):
         """
