@@ -34,8 +34,6 @@ class Bot:
         # - Initiated
         global SOCKET_IP, user
 
-        self._listeners = {}
-
         # Check if a local server is being used to test Nertivia features (Address hardcoded to be the default one)
         if args.get("test"):
             SOCKET_IP = "http://server.localtest.me"
@@ -52,8 +50,8 @@ class Bot:
         self.http = HTTPClient(socket_ip=SOCKET_IP)
 
         # Note : Consider moving around, if i forgot to remove this check feasibility to move this upwards
-        from .cache_nertivia_data import user
-        self.user: User = user
+        import nertivia.cache_nertivia_data
+        self.user: User = nertivia.cache_nertivia_data.user
         self.headers = {'Accept': 'text/plain',
                         'authorization': token,
                         'Content-Type': 'application/json;charset=utf-8'}
@@ -83,7 +81,10 @@ class Bot:
         @a_sio.event
         def auth_err(data):
             print("Invalid Token")
-
+        @a_sio.event
+        async def sid(data):
+            print("sid")
+            await self.sio.emit('authentication', {'token': new_token})
         await a_sio.wait()
 
     def update_bot_user(self, data):

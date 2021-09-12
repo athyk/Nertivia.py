@@ -11,9 +11,10 @@ class Server(object):
         Set basic variables for ease of use
         """
         self.http = http.HTTPClient()
-        self.id = server['server_id']
-        self.name = server['name']
-        self.default_channel: nertivia.Channel = server['default_channel_id']
+        if server is not None:
+            self.id = server['server_id']
+            self.name = server['name']
+            self.default_channel: nertivia.Channel = server['default_channel_id']
 
     def __repr__(self):
         """

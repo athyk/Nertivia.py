@@ -8,14 +8,8 @@ import threading
 import time
 import urllib
 
-try:
-    import requests
-except ImportError:  # pragma: no cover
-    requests = None
-try:
-    import websocket
-except ImportError:  # pragma: no cover
-    websocket = None
+import requests
+import websocket
 from . import exceptions
 from . import packet
 from . import payload

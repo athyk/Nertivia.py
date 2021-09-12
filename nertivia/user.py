@@ -7,25 +7,26 @@ class User(object):
         Instantiate variables to be used later on
         """
         # If the user is not cached
-        if "user" not in user:
-            user = {"user": user}
+        if user is not None:
+            if "user" not in user:
+                user = {"user": user}
 
-        # Check whether the user ID is stored under `uniquerID` or `id`
-        if "uniqueID" in user["user"]:
-            self.id = user['user']['uniqueID']
-        else:
-            self.id = user['user']['id']
+            # Check whether the user ID is stored under `uniquerID` or `id`
+            if "uniqueID" in user["user"]:
+                self.id = user['user']['uniqueID']
+            else:
+                self.id = user['user']['id']
 
-        self.username = user['user']['username']
-        self.tag = user['user']['tag']
+            self.username = user['user']['username']
+            self.tag = user['user']['tag']
 
-        # Set it to false first in case it doesn't exist, same story as using an &&
-        self.bot = False if "bot" not in user["user"] else user["user"]["bot"]
+            # Set it to false first in case it doesn't exist, same story as using an &&
+            self.bot = False if "bot" not in user["user"] else user["user"]["bot"]
 
-        self.avatar_url = "https://nertivia.net/api/avatars/{}".format(user['user']['avatar'])
+            self.avatar_url = "https://nertivia.net/api/avatars/{}".format(user['user']['avatar'])
 
-        # Set the user representation as Username#Tag
-        self.user = "{}@{}".format(user['user']['username'], user['user']['tag'])
+            # Set the user representation as Username#Tag
+            self.user = "{}@{}".format(user['user']['username'], user['user']['tag'])
 
     def __repr__(self):
         """
