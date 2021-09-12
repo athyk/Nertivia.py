@@ -15,8 +15,13 @@ class Channel(object):
         """
         Creates a new channel object, takes in a dictionary containing full Channel information
         """
-        # Set the channel http attribute to the http object to simplify sending or retrieving of messages
-        self.http = http.HTTPClient()
+        
+        # Allow for user-specific HTTPClient object.
+        if kwargs.get('http') and isinstance(kwargs['http'], http.HTTPClient):
+            self.http = kwargs['http']
+        else:
+            # Set the channel http attribute to the http object to simplify sending or retrieving of messages
+            self.http = http.HTTPClient()
 
         # Set all of the properties of the channel in a self.x blob, consider cleaning up if possible
         # If a Channel object is provided in the arguments, then just extract all of its information
