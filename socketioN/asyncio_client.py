@@ -2,6 +2,7 @@ import asyncio
 import logging
 import random
 import traceback
+import types
 
 import engineioN
 import nertivia.cache_nertivia_data
@@ -14,6 +15,7 @@ from . import packet
 default_logger = logging.getLogger('socketioN.client')
 
 
+# noinspection PyUnresolvedReferences
 class AsyncClient(client.Client):
     """A Socket.IO client for asyncio.
 
@@ -488,21 +490,25 @@ class AsyncClient(client.Client):
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
-                    for handler in self.handlers[namespace][event]:
-                        try:
-                            if event == "receiveMessage":
-                                ret = await handler(nertivia.message.Message(*args))
-                            elif event == "delete_message":
-                                ret = await handler(
-                                    nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"])))
-                            elif event == "update_message":
-                                ret = await handler(before_message, after_message)
-                            elif event == "success":
-                                ret = await handler(nertivia.user.User(*args))
-                            else:
-                                ret = await handler(*args)
-                        except asyncio.CancelledError:  # pragma: no cover
-                            ret = None
+                    print(type(self.handlers[namespace][event]))
+                    if isinstance(self.handlers[namespace][event], types.FunctionType):
+                        ret = await self.handlers[namespace][event](*args)
+                    else:
+                        for handler in self.handlers[namespace][event]:
+                            try:
+                                if event == "receiveMessage":
+                                    ret = await handler(nertivia.message.Message(*args))
+                                elif event == "delete_message":
+                                    ret = await handler(
+                                        nertivia.cache_nertivia_data.messages.__getitem__(str(args[0]["messageID"])))
+                                elif event == "update_message":
+                                    ret = await handler(before_message, after_message)
+                                elif event == "success":
+                                    ret = await handler(nertivia.user.User(*args))
+                                else:
+                                    ret = await handler(*args)
+                            except asyncio.CancelledError:  # pragma: no cover
+                                ret = None
                 except Exception:
                     await self.handlers[namespace][event](*args)
                     print(traceback.format_exc())

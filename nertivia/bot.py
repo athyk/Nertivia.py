@@ -85,10 +85,9 @@ class Bot:
             print("Invalid Token")
 
         @a_sio.event
-        async def sid(data):
-            print("sid")
+        async def connect():
+            print("reconnected to server!")
             await self.sio.emit('authentication', {'token': new_token})
-
         await a_sio.wait()
 
     def update_bot_user(self, data):
