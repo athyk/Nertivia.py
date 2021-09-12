@@ -19,7 +19,10 @@ class Message:
         """
         # If a message object is passed then use its information to create this Message object
         # Otherwise create a new one from nothing
-        self.http = nertivia.bot.HTTPClient()
+        if kwargs.get('http') and isinstance(kwargs['http'], http.HTTPClient):
+            self.http = kwargs['http']
+        else:
+            self.http = http.HTTPClient()
 
         if "message" in message:
             self.id: int = message['message']['messageID']
