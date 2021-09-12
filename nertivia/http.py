@@ -259,7 +259,7 @@ class HTTPClient:
         `force_cache` may be set to True to have the function return None rather than perform an API call
         """
 
-        if str(user_id) in cache_nertivia_data.guilds:
+        if str(user_id) in cache_nertivia_data.users:
             return cache_nertivia_data.users[str(user_id)]
         elif not force_cache:
             return nertivia.User(asyncio.run(fetch_user(user_id)))
