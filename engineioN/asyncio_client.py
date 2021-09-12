@@ -3,10 +3,7 @@ import signal
 import ssl
 import threading
 
-try:
-    import aiohttp
-except ImportError:  # pragma: no cover
-    aiohttp = None
+import aiohttp
 
 from . import client
 from . import exceptions

@@ -24,10 +24,14 @@ class Message:
             self.http = kwargs['http']
         else:
             self.http = http.HTTPClient()
-
         if "message" in message:
             self.id: int = message['message']['messageID']
-            self.content: str = message['message']['message']
+            if "message" in message['message']:
+                self.content: str = message['message']['message']
+            else:
+                self.content: str = ""
+            if "files" in message['message']:
+                self.files = message["message"]["files"]
             self.channel: nertivia.Channel = self.http.get_channel(message["message"]["channelID"])
             self.author: str = message['message']['creator']['username'] + '@' + message['message']['creator']['tag']
 
@@ -71,7 +75,9 @@ class Message:
         Send a new message using a message
         Do not call manually
         """
-        await self.http.send_message(self.channel.id, message)
+        message = await self.http.send_message(self.channel.id, message)
+        message_json = await message.json()
+        return Message({"message": message_json["messageCreated"]})
 
     async def delete(self):
         """

@@ -40,7 +40,7 @@ class Client:
         # Connect to the Nertivia severs
         self.sio.connect(SOCKET_IP, namespaces=['/'], transports=['websocket'])
 
-        # Event listener, when asked return the authentification header
+        # Event listener, when asked return the authentication header
         @self.sio.event
         def connect():
             sio.emit('authentication', {'token': token})

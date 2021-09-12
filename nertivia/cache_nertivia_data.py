@@ -1,10 +1,12 @@
 from collections import OrderedDict
-
 # The following dictionaries hold all cached information relative to their name
-users = {}
-members = {}
-guilds = {}
-user = {}
+from .user import User
+from .server import Server
+
+users: dict[str, User] = {"0": User(None)}
+members: dict[str, User] = {"0": User(None)}
+guilds: dict[str, Server] = {"0": Server(None)}
+user: User = User(None)
 
 
 class LimitedCache(OrderedDict):
@@ -12,6 +14,7 @@ class LimitedCache(OrderedDict):
     Holds limited amount of information, acts as a cache object for messages objects
     Size of it can be edited during initialisation
     """
+
     def __init__(self, maxsize=500, /, *args, **kwds):
         """
         MaxSize affects the maximum size of the cache (main use -> messages to reduce RAM usage)

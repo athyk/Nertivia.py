@@ -101,7 +101,7 @@ async def fetch_user(user_id):
     if res.status != 200:
         return res.content
 
-    # However, if succesful return the json data that was returned and transform it into its python equivalent
+    # However, if successful return the json data that was returned and transform it into its python equivalent
     return await res.json()
 
 
@@ -211,13 +211,11 @@ class HTTPClient:
         res = await session.post(url=str(URL_MSG + '/channels/' + str(channel_id)),
                                  data=json.dumps({"message": content}),
                                  headers=headers)
-
         # Reminder : if 2XX then it is a success
         if res.status != 200:
-            return res.content
-
+            return res
         # If successful return...Success message ? Not sure
-        return res.content
+        return res
 
     async def get_message(self, message_id, channel_id):
         """
@@ -247,7 +245,10 @@ class HTTPClient:
         Channels are not cached ?
         Returns a nertivia.Channel object
         """
-        res = asyncio.run(fetch_channel(channel_id))
+        try:
+            res = asyncio.run(fetch_channel(channel_id))
+        except asyncio.TimeoutError:
+            res = asyncio.run(fetch_channel(channel_id))
         return nertivia.Channel(res)
 
     def get_user(self, user_id, force_cache: bool = False):

@@ -1,5 +1,6 @@
 import nertivia
 from nertivia import http
+from nertivia import message
 
 # Official Nertivia Server endpoints, Consider having the first part be variable and changeable from a central location
 URL = "https://nertivia.net/api/messages/channels/"
@@ -50,12 +51,15 @@ class Channel(object):
         # Self.server removed .__repr__ as repr will be returned when used in this context
         return f"<id={self.id} name='{self.name}' server=<{self.server}>>"
 
-    async def send(self, message):
+    async def send(self, message_content):
         """
         Asynchronously send a message in a channel
         """
         # Throw it to the http object
-        await self.http.send_message(self.id, message)
+
+        return_message = await self.http.send_message(self.id, message_content)
+        message_json = await return_message.json()
+        return message.Message({"message": message_json["messageCreated"]})
 
     async def get_message(self, message_id):
         """

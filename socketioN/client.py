@@ -21,6 +21,7 @@ def signal_handler(sig, frame):  # pragma: no cover
     disconnection tasks are handled at the engine.io level.
     """
     for client in reconnecting_clients[:]:
+        # noinspection PyProtectedMember
         client._reconnect_abort.set()
     if callable(original_signal_handler):
         return original_signal_handler(sig, frame)
