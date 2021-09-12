@@ -490,7 +490,6 @@ class AsyncClient(client.Client):
         if namespace in self.handlers and event in self.handlers[namespace]:
             if asyncio.iscoroutinefunction(self.handlers[namespace][event]):
                 try:
-                    print(type(self.handlers[namespace][event]))
                     if isinstance(self.handlers[namespace][event], types.FunctionType):
                         ret = await self.handlers[namespace][event](*args)
                     else:

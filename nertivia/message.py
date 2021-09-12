@@ -47,8 +47,8 @@ class Message:
         """
         Return a representation of the class Instance
         """
-        return f"<id={self.id} content='{self.content}' channel=<{self.channel.__repr__()}> " \
-               f"server=<{self.server.__repr__()}> author='{self.author}'>"
+        return f"<id={self.id} content='{self.content}' channel={self.channel.__repr__()} " \
+               f"server={self.server.__repr__()} author='{self.author}'>"
 
     @property
     def _id(self):
