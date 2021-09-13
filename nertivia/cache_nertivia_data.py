@@ -1,11 +1,13 @@
 from collections import OrderedDict
+from typing import Dict
+
 # The following dictionaries hold all cached information relative to their name
 from .user import User
 from .server import Server
 
-users: dict[str, User] = {"0": User(None)}
-members: dict[str, User] = {"0": User(None)}
-guilds: dict[str, Server] = {"0": Server(None)}
+users: Dict[str, User] = {"0": User(None)}
+members: Dict[str, User] = {"0": User(None)}
+guilds: Dict[str, Server] = {"0": Server(None)}
 user: User = User(None)
 
 

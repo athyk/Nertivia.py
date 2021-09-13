@@ -64,11 +64,11 @@ class Message:
         """
         return self.author
 
-    async def edit(self, channel, content):
+    async def edit(self, content):
         """
         Asynchronous function to edit a message, takes a channel object and a message content
         """
-        await self.http.edit_message(self.id, channel, content)
+        await self.http.edit_message(self.id, self.channel.id, content)
 
     async def send(self, message):
         """
