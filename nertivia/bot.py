@@ -167,7 +167,7 @@ class Bot:
         # In case something unexpected happened, we catch it and print the error
         except Exception:
             # noinspection PyArgumentList
-            print(traceback.print_exception())
+            traceback.print_exc()
 
     def event(self, *args):
         """
