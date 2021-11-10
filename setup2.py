@@ -1,17 +1,18 @@
 import setuptools
 
-with open("README2.md", "r", encoding="utf-8") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
 
 requirements: list = ["setuptools", "requests", "nest_asyncio", "six>=1.9.0", "websocket-client>=0.54.0",
                       "websockets>=7.0", "aiohttp>=3.4", "bidict"]
 
 setuptools.setup(
-    name='nertivia',  # How you named your package folder (MyLib)
+    name='nertivia.py',  # How you named your package folder (MyLib)
     version='0.2.9',  # Start with a small number and increase it with every change you make
     license='apache-2.0',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
-    description='A mirror package for nertivia.py. Please install that instead.',  # Give a short description about your library
-    long_description= long_description,
+    description='Python API Wrapper for Nertivia',  # Give a short description about your library
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Nertivia-PY/Nertivia.py/",
     author='FluxedScript',  # Type in your name
