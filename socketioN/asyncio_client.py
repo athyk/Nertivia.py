@@ -538,7 +538,7 @@ class AsyncClient(client.Client):
         if event == "server:leave":
             del nertivia.cache_nertivia_data.guilds[str(args[0]["server_id"])]
 
-        # or else, forward the event to a namepsace handler if one exists
+        # or else, forward the event to a namespace handler if one exists
         if namespace in self.namespace_handlers:
             return await self.namespace_handlers[namespace].trigger_event(
                 event, *args)

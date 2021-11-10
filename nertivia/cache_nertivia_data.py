@@ -5,11 +5,6 @@ from typing import Dict
 from .user import User
 from .server import Server
 
-users: Dict[str, User] = {"0": User(None)}
-members: Dict[str, User] = {"0": User(None)}
-guilds: Dict[str, Server] = {"0": Server(None)}
-user: User = User(None)
-
 
 class LimitedCache(OrderedDict):
     """
@@ -41,4 +36,9 @@ class LimitedCache(OrderedDict):
             del self[oldest]
 
 
-messages = LimitedCache()
+users: OrderedDict[str, User] = LimitedCache(maxsize=300)
+members: OrderedDict[str, User] = LimitedCache(maxsize=800)
+guilds: Dict[str, Server] = {"0": Server(None)}
+user: User = User(None)
+
+messages = LimitedCache(maxsize=1000)
