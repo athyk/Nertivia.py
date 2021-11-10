@@ -8,7 +8,7 @@ requirements: list = ["setuptools", "requests", "nest_asyncio", "six>=1.9.0", "w
 
 setuptools.setup(
     name='nertivia',  # How you named your package folder (MyLib)
-    version='0.2.9',  # Start with a small number and increase it with every change you make
+    version='0.2.91',  # Start with a small number and increase it with every change you make
     license='apache-2.0',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='A mirror package for nertivia.py. Please install that instead.',  # Give a short description about your library
     long_description= long_description,
