@@ -1,11 +1,13 @@
-import websocket
+import asyncio
+
+import websockets
 import _thread
 import time
 import json
 
 
-def send_message(ws, message):
-    ws.send(message)
+async def send_message(ws, message):
+    await ws.send(message)
     if message == "3":
         print("↑ WebSocket pong")
     else:
@@ -13,24 +15,25 @@ def send_message(ws, message):
 
 
 # Define WebSocket callback functions
-def ws_message(ws, message):
-    code = message[:2]
-    if code == '40':
+async def ws_message(ws, message):
+    print("↓ WebSocket received: %s" % message)
+    code = message[:2].replace("{", "").replace("}", "").replace(":", "")
+    if code == "0":
+        await send_message(ws, "40")
+    elif code == '40':
         print("↓ WebSocket connected")
         token = "TOKEN"
-        send_message(ws,
-                     '42["authentication", {"token": "{%s}"}]'.replace("{%s}", token))
+        await send_message(ws,
+                           '42["authentication", {"token": "{%s}"}]'.replace("{%s}", token))
         # Broadcast authentication
     elif code == "2":
         print("↓ WebSocket thread: ping")
-        send_message(ws, "3")  # Send pong to ping
+        await send_message(ws, "3")  # Send pong to ping
     elif code == "42":
         message = json.loads(message[2:])
         event = message[0]
         data = message[1]
         print("↓ WebSocket event: " + event, data)
-    else:
-        print("↓ WebSocket received: %s" % message)
 
 
 def ws_open(ws):
@@ -42,22 +45,26 @@ def ws_error(ws, error):
     print("WebSocket error: %s" % error)
 
 
-def ws_close(ws, code, reason):
+async def ws_close(ws, code, reason):
     print("WebSocket thread: closed")
+    await ws.close()
     print(code)
     print(reason)
 
 
-def ws_thread(*args):
-    ws = websocket.WebSocketApp('wss://nertivia.net/socket.io/?EIO=4&transport=websocket', on_open=ws_open,
-                                on_message=ws_message, on_error=ws_error,
-                                on_close=ws_close)
-    ws.run_forever()
+async def setup_connection():
+    async with websockets.connect('wss://nertivia.net/socket.io/?EIO=4&transport=websocket') as websocket:
+        while True:
+            try:
+                message = await websocket.recv()
+                await ws_message(websocket, message)
+            except websockets.ConnectionClosed:
+                await ws_close(websocket, None, None)
+                break
+            except websockets.ConnectionClosed:
+                print('ConnectionClosed')
+                is_alive = False
+                break
 
 
-# Start a new thread for the WebSocket interface
-_thread.start_new_thread(ws_thread, ())
-
-# Continue other (non WebSocket) tasks in the main thread
-while True:
-    time.sleep(5)
+asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(setup_connection()))
