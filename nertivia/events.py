@@ -1,5 +1,6 @@
 events = {
     "authenticated": "on_ready",
+    "multiDeviceStatus": "on_self_multi_device_status",
 
     # Message events
     "message:created": "on_message",

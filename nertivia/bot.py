@@ -1,6 +1,6 @@
 import json
 import logging
-
+import nertivia.events
 import websockets
 
 import asyncio
@@ -73,8 +73,9 @@ class Bot(object):
 
     async def call_event(self, event, data):
         self.logger.info("Calling event: " + event)
-        if event in self.handlers:
-            await self.handlers[event](data)
+        renamed_event = nertivia.events.events[event]
+        if renamed_event in self.handlers:
+            await self.handlers[renamed_event](data)
 
     def login(self, token, url=None):
         self.token = token
