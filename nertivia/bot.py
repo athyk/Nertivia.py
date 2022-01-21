@@ -18,20 +18,26 @@ class Bot(object):
                  max_roles=100,
                  max_emojis=100,
                  max_invites=-1,
-                 test=False,
+                 test=False
                  ):
-        self.url = None
-        self.token = None
-        self.logger = logging.getLogger('nertivia.bot')
+        self.url = 'wss://nertivia.net/socket.io/?EIO=4&transport=websocket'  # Server to connect to
+
+        self.token = None  # Token to use for any http or websocket requests
+
+        self.logger = logging.getLogger('nertivia.bot')  # Set up logger, allows use for own logger
         if logger:
             self.logger = logger
+
         self.logger.setLevel(logging.ERROR)
         if test:
             self.logger.setLevel(logging.INFO)
             self.logger.addHandler(logging.StreamHandler())
-        self.handlers = {}
+
+        self.handlers = {}  # Stores events
+
         self.request_timeout = request_timeout
         self.max_retries = max_retries
+        # Cache options
         self.max_messages = max_messages
         self.max_reactions = max_reactions
         self.max_channels = max_channels
@@ -72,7 +78,9 @@ class Bot(object):
 
     def login(self, token, url=None):
         self.token = token
-        self.url = url
+
+        if url:
+            self.url = url
         asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(self.run()))
 
     async def send_ws_message(self, ws, message):
@@ -89,9 +97,9 @@ class Bot(object):
             await self.send_ws_message(ws, "40")
         elif code == '40':
             self.logger.info("↓ WebSocket connected")
+            # Broadcast authentication to prevent being kicked
             await self.send_ws_message(ws,
                                        '42["authentication", {"token": "{%s}"}]'.replace("{%s}", self.token))
-            # Broadcast authentication
         elif code == "2":
             self.logger.info("↓ WebSocket thread: ping")
             await self.send_ws_message(ws, "3")  # Send pong to ping
@@ -109,7 +117,7 @@ class Bot(object):
 
     async def run(self):
         self.logger.info('Starting bot')
-        async with websockets.connect('wss://nertivia.net/socket.io/?EIO=4&transport=websocket') as websocket:
+        async with websockets.connect(self.url) as websocket:
             while True:
                 try:
                     message = await websocket.recv()
