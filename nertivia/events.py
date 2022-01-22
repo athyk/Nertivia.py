@@ -1,6 +1,7 @@
 events = {
     "authenticated": "on_ready",
     "multiDeviceStatus": "on_self_multi_device_status",
+    "disconnected": "on_disconnect",
 
     # Message events
     "message:created": "on_message",
