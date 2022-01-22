@@ -4,7 +4,7 @@ token = ""
 
 # Change to True to enable viewing of events, information
 
-client = nertivia.Bot(debug=False)
+client = nertivia.Bot(test=False)
 
 
 @client.event

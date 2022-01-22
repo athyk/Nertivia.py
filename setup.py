@@ -8,16 +8,16 @@ requirements: list = ["setuptools", "requests", "nest_asyncio", "six>=1.9.0", "w
 
 setuptools.setup(
     name='nertivia',  # How you named your package folder (MyLib)
-    version='0.2.91',  # Start with a small number and increase it with every change you make
+    version='0.2.92',  # Start with a small number and increase it with every change you make
     license='apache-2.0',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
-    description='A mirror package for nertivia.py. Please install that instead.',  # Give a short description about your library
+    description='A mirror package for nertivia.py. Please install that instead.',  # Give a short description about
+    # your library
     long_description= long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Nertivia-PY/Nertivia.py/",
-    author='FluxedScript',  # Type in your name
-    keywords=['API Wrapper', 'SIMPLE', 'PYTHON', "nertivia"],  # Keywords that define your package best
-    package_dir={"socketioN": "socketioN"},
-    packages=setuptools.find_namespace_packages(include=['nertivia', "socketioN", "engineioN"]),
+    author='Athy K',  # Type in your name
+    keywords=['API Wrapper', 'SIMPLE', 'PYTHON'],  # Keywords that define your package best
+    packages=setuptools.find_namespace_packages(include=['nertivia']),
     install_requires=requirements,
     extras_require={
         'client': [
@@ -29,13 +29,5 @@ setuptools.setup(
             'websockets>=7.0',
         ]
     },
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
-        'Intended Audience :: Developers',  # Define that your audience are developers
-        'Topic :: Software Development :: Build Tools',
-        'License :: OSI Approved :: Apache Software License',  # Again, pick a license
-        'Programming Language :: Python :: 3',  # Specify which pyhton versions that you want to support
-    ],
     python_requires=">=3.6",
 )
